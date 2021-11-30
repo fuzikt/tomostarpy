@@ -1,0 +1,4 @@
+#!/bin/bash
+# run this script to build cython libs
+cd lib
+python setup.py build_ext --inplace
