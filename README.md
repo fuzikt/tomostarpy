@@ -18,7 +18,7 @@ $ source venv/bin/activate
 (venv) $ ./build_libs.bsh
 ```
 
-##Usage
+## Usage
 
 Before usage don't forget to source the venv environment if it is not yet activated:
 ``` 
