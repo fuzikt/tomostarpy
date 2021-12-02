@@ -211,19 +211,22 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
     cdef float minColor, maxColor
     if outputCmmFile != "":
         # create a 512 steps red/green rainbow array for cmm - each element represents r/g/b (0 = min; 1=max)
-        rainbowArray = []
-        rangeColor = 512
-        for i in range(int(rangeColor / 2)):  # from red -> yellow
-            rainbowArray.append([1, i / (rangeColor / 2), 0])
-        for i in range(int(rangeColor / 2), 0, -1):  # from yellow -> green
-            rainbowArray.append([i / (rangeColor / 2), 1, 0])
+        if coloringLabel != "":
+            rainbowArray = []
+            rangeColor = 512
+            for i in range(int(rangeColor / 2)):  # from red -> yellow
+                rainbowArray.append([1, i / (rangeColor / 2), 0])
+            for i in range(int(rangeColor / 2), 0, -1):  # from yellow -> green
+                rainbowArray.append([i / (rangeColor / 2), 1, 0])
 
-        #get the min and max value (ie range) of the desired label in the star file
-        minColor = getattr(particles[0], coloringLabel)
-        maxColor = getattr(particles[0], coloringLabel)
-        for particle in particles:
-            minColor = min(minColor, getattr(particle, coloringLabel))
-            maxColor = max(maxColor, getattr(particle, coloringLabel))
+            #get the min and max value (ie range) of the desired label in the star file
+            minColor = getattr(particles[0], coloringLabel)
+            maxColor = getattr(particles[0], coloringLabel)
+            for particle in particles:
+                minColor = min(minColor, getattr(particle, coloringLabel))
+                maxColor = max(maxColor, getattr(particle, coloringLabel))
+        else:
+            rainbowArray = [[1,1,0]]
 
     print("Output map size [x, y, z]: %i x %i x %i" % (mapMaxX, mapMaxY, mapMaxZ))
 
@@ -278,7 +281,10 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
 
         if outputCmmFile != "":
             #color value index in raibowArray
-            colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
+            if coloringLabel != "":
+                colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
+            else:
+                colorIndex = 0
             cmm_coordinates.append(
                 [particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ, rainbowArray[colorIndex]])
 

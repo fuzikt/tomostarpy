@@ -22,7 +22,7 @@ class placebackSubvolume:
             help="Binning factor of the stencil tomogram. If not provided calculated from MRC header and star file")
         add('--no_partial', dest='no_partial', action='store_true', default=False,
             help="Do not place partial volumes. If the subvolume is partially out of the output volume, it is not placed at all. This avoids \"half-cut\" sub-volumes in the output.")
-        add('--color_lb', type=str, default="0",
+        add('--color_lb', type=str, default="",
             help="Label from the star file that will be used for rainbow coloring of the cmm markers.")
         add('--color_map', type=str, default="", help="Output map with coloring values.")
         add('--color_map_threshold', type=str, default="0.01",
@@ -72,6 +72,7 @@ class placebackSubvolume:
             placePartialVolumes = True
         else:
             placePartialVolumes = False
+
         coloringLabel = args.color_lb
 
         outputColorMap = args.color_map
