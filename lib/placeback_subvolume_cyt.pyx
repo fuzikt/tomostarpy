@@ -180,8 +180,8 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
 @cython.wraparound(False)
 @cython.nonecheck(False)
 @cython.cdivision(True)
-def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputMap, outputCmmFile, binning,
-                    placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold):
+def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, binning,
+                    placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend):
     #read in star file
     md = MetaData(inputStarFile)
     particles = []
@@ -210,7 +210,7 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
     mapMaxX, mapMaxY, mapMaxZ, mapApix, mapOriginX, mapOriginY, mapOriginZ = readMrcSizeApix(outputMapStencil)
 
     cdef float minColor, maxColor
-    if outputCmmFile != "":
+    if outputCmm:
         # create a 512 steps red/green rainbow array for cmm - each element represents r/g/b (0 = min; 1=max)
         if coloringLabel != "":
             rainbowArray = []
@@ -256,9 +256,15 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
     cdef np.ndarray[DTYPE_t, ndim=1] outputMapArray = np.full((mapMaxX * mapMaxY * mapMaxZ), 0.0, dtype=DTYPE)
 
     cdef bint makeColorMap = False
-    cdef np.ndarray[DTYPE_t, ndim=1] outputColorMapArray = np.full((mapMaxX * mapMaxY * mapMaxZ), 0.0, dtype=DTYPE)
-    if outputColorMap != "":
+    cdef bint makeCmm = False
+
+    #convert python boolean to bint
+    if outputColorMap:
         makeColorMap = True
+    if outputCmm:
+        makeCmm = True
+
+    cdef np.ndarray[DTYPE_t, ndim=1] outputColorMapArray = np.full((mapMaxX * mapMaxY * mapMaxZ), 0.0, dtype=DTYPE)
 
     cdef int nrOfParticles = len(particles)
     currentParticleNr = 1
@@ -267,9 +273,10 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
     mapToRotate = readMrcData(inputVolumeToPlace)
 
     cdef float colorMapTreshold_c = colorMapTreshold
+    cdef int colorMapExtend_c = int(colorMapExtend)
     cdef float coloringValue
     cdef float xpos, ypos, zpos
-    cdef int pixPos, origX, origY, origZ, newX, newY, newZ
+    cdef int pixPos, origX, origY, origZ, newX, newY, newZ, x_extend, y_extend, z_extend
     cdef DTYPE_t pixel
 
     cdef np.ndarray[DTYPE_t, ndim=1] rotatedMap = np.full((inputMapMaxX * inputMapMaxY * inputMapMaxZ), 0.0,
@@ -292,7 +299,7 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
         if coloringLabel != "":
             coloringValue = round(float(getattr(particle, coloringLabel)) * 100) / 100
 
-        if outputCmmFile != "":
+        if makeCmm:
             #color value index in raibowArray
             if coloringLabel != "":
                 colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
@@ -339,7 +346,11 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
 
                     if makeColorMap:
                         if pixel >= colorMapTreshold_c:
-                            outputColorMapArray[newX + newY * mapMaxX + newZ * mapMaxX * mapMaxY] = coloringValue
+                            for x_extend in range(newX-colorMapExtend_c, newX+colorMapExtend_c, 1):
+                                for y_extend in range(newY - colorMapExtend_c, newY + colorMapExtend_c, 1):
+                                    for z_extend in range(newZ - colorMapExtend_c, newZ + colorMapExtend_c, 1):
+                                        if z_extend < mapMaxZ and y_extend < mapMaxY and x_extend < mapMaxX and z_extend >= 0 and y_extend >= 0 and x_extend >= 0:
+                                            outputColorMapArray[x_extend + y_extend * mapMaxX + z_extend * mapMaxX * mapMaxY] = coloringValue
 
         currentParticleNr += 1
 
@@ -347,15 +358,15 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputM
     sys.stdout.write('\r\n')
 
     print("Writing MRC file...")
-    writeMrcFile(outputMapArray, outputMapStencil, outputMap)
-    print("%s written." % outputMap)
+    writeMrcFile(outputMapArray, outputMapStencil, outputPrefix+".mrc")
+    print("%s.mrc written." % outputPrefix)
 
     if makeColorMap:
-        writeMrcFile(outputColorMapArray, outputMapStencil, outputColorMap)
-        print("%s written." % outputColorMap)
+        writeMrcFile(outputColorMapArray, outputMapStencil, outputPrefix+"_color.mrc")
+        print("%s_color.mrc written." % outputPrefix)
 
-    if outputCmmFile != "":
-        writeCmmFile(cmm_coordinates, outputCmmFile, inputMapMaxX * inputApix, apix, mapOriginX, mapOriginY, mapOriginZ)
-        print("%s written." % outputCmmFile)
+    if outputCmm:
+        writeCmmFile(cmm_coordinates, outputPrefix + ".cmm", inputMapMaxX * inputApix, apix, mapOriginX, mapOriginY, mapOriginZ)
+        print("%s.cmm written." % outputPrefix)
     print("===>Total run time: %0.2f sec" % ((time.perf_counter() - total_start)))
     print("All done. Have fun!")

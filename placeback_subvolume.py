@@ -16,8 +16,8 @@ class placebackSubvolume:
         add('--isub', type=str, default="", help="Input file of sub-volume to be placed.")
         add('--itomo', type=str, default="",
             help="Input file of the stencil tomogram. Size and origin is take from this file and applied on the output.")
-        add('--o', help="Output map.")
-        add('--cmm', type=str, default="", help="Chimera cmm file with the coordinates of the placed sub-volumes")
+        add('--o', help="Output prefix")
+        add('--cmm',  dest='cmm', action='store_true', default=False, help="Create Chimera cmm file with the coordinates of the placed sub-volumes.")
         add('--bin', type=str, default="0",
             help="Binning factor of the stencil tomogram. If not provided calculated from MRC header and star file")
         add('--no_partial', dest='no_partial', action='store_true', default=False,
@@ -26,9 +26,11 @@ class placebackSubvolume:
             help="Recenter the particles by subtracting rlnOriginX/Y/ZAngst from X/Y coordinates.")
         add('--color_lb', type=str, default="",
             help="Label from the star file that will be used for rainbow coloring of the cmm markers.")
-        add('--color_map', type=str, default="", help="Output map with coloring values.")
+        add('--color_map',  dest='color_map', action='store_true', default=False, help="Create map with coloring values stored as pixel value.")
         add('--color_map_threshold', type=str, default="0.01",
             help="Threshold value at which the contour of the --isub in the output color map should contain values")
+        add('--color_map_extend', type=str, default="2",
+            help="Extend the border around the threshold meeting value by this amount of pixels.")
 
     def usage(self):
         self.parser.print_help()
@@ -54,10 +56,10 @@ class placebackSubvolume:
             self.error("No input stencil tomogram was given. Please, use the --itomo to specify one.")
 
         if args.o == "":
-            self.error("No output file was specified.")
+            self.error("No output prefix was specified.")
 
-        if args.cmm == "":
-            print("!!!WARNING: --cmm was not specified. No cmm file will be saved.")
+        if float(args.color_map_extend)<1:
+            self.error("--color_map_extend has to be a positive number.")
 
     def main(self):
         self.define_parser()
@@ -67,8 +69,8 @@ class placebackSubvolume:
         inputStarFile = args.i
         inputVolumeToPlace = args.isub
         outputMapStencil = args.itomo
-        outputMap = args.o
-        outputCmmFile = args.cmm
+        outputPrefix = args.o
+        outputCmm = args.cmm
         binning = float(args.bin)
         if args.no_partial == False:
             placePartialVolumes = True
@@ -83,8 +85,10 @@ class placebackSubvolume:
 
         colorMapTreshold = float(args.color_map_threshold)
 
-        placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputMap, outputCmmFile, binning,
-                        placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold)
+        colorMapExtend = float(args.color_map_extend)
+
+        placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, binning,
+                        placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend)
 
 
 if __name__ == "__main__":
