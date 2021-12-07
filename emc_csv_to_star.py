@@ -153,7 +153,7 @@ class emcCSVtoStar:
         # convert mod file to coordinates txt
         sys.stdout.flush()
         command = "point2model -sphere 3 -scat -inp %s -ou %s > /dev/null" % (
-        outputCoordinateFile, outputCoordinateModFile)
+            outputCoordinateFile, outputCoordinateModFile)
         proc = subprocess.Popen(command, shell=True)
         proc.wait()
 
@@ -166,8 +166,9 @@ class emcCSVtoStar:
         mdOut.addLabels("data_optics", "rlnOpticsGroup", "rlnOpticsGroupName", "rlnSphericalAberration", "rlnVoltage",
                         "rlnTomoTiltSeriesPixelSize")
         mdOut.addDataTable("data_particles")
-        mdOut.addLabels("data_particles", "rlnTomoName", "rlnCoordinateX", "rlnCoordinateY", "rlnCoordinateZ",
-                        "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi", "rlnCtfFigureOfMerit")
+        mdOut.addLabels("data_particles", ["rlnTomoName", "rlnCoordinateX", "rlnCoordinateY", "rlnCoordinateZ",
+                                           "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi", "rlnOriginXAngst",
+                                           "rlnOriginYAngst", "rlnOriginZAngst", "rlnCtfFigureOfMerit"])
 
         # create optics groups
         opticGroup = starItem()
@@ -197,6 +198,9 @@ class emcCSVtoStar:
             particle.rlnAngleRot = degrees(rot)
             particle.rlnAngleTilt = degrees(tilt)
             particle.rlnAnglePsi = degrees(psi)
+            particle.rlnOriginXAngst = 0.0
+            particle.rlnOriginYAngst = 0.0
+            particle.rlnOriginZAngst = 0.0
             new_particles.append(particle)
         mdOut.addData("data_particles", new_particles)
         mdOut.write(outputStarFile)

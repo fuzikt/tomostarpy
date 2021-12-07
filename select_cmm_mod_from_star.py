@@ -50,7 +50,7 @@ class SelCmmModStar:
             print("!!!Warning: Using mod file and binning factor was not specified. Using default value: 1")
 
     def readCmmFile(self, cmmFileName):
-        selectedParticlesCoords = []
+        selectedParticlesCoords = {}
         with open(cmmFileName) as file:
             for line in file:
                 if "id=" in line:
@@ -61,7 +61,13 @@ class SelCmmModStar:
                             coordY = int(round(float(re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line_element)[0])))
                         elif "coordZ" in line_element:
                             coordZ = int(round(float(re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line_element)[0])))
-                    selectedParticlesCoords.append([coordX, coordY, coordZ])
+                        elif "x" in line_element:
+                            xAngst = int(round(float(re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line_element)[0])))
+                        elif "y" in line_element:
+                            yAngst = int(round(float(re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line_element)[0])))
+                        elif "z" in line_element:
+                            zAngst = int(round(float(re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line_element)[0])))
+                    selectedParticlesCoords[tuple([coordX, coordY, coordZ])] = [xAngst, yAngst, zAngst]
         return selectedParticlesCoords
 
     def readModFile(self, modFileName, binning):
@@ -70,13 +76,15 @@ class SelCmmModStar:
         proc = subprocess.Popen(command, shell=True)
         proc.wait()
 
-        selectedParticlesCoords = []
+        selectedParticlesCoords = {}
 
         with open("tmp_model_coords.txt") as file:
             for line in file:
-                selectedParticlesCoords.append(
-                    [int(round(float(line.split()[0]) * binning)), int(round(float(line.split()[1]) * binning)),
-                     int(round(float(line.split()[2]) * binning))])
+                selectedParticlesCoords[
+                    tuple([int(round(float(line.split()[0]) * binning)), int(round(float(line.split()[1]) * binning)),
+                           int(round(float(line.split()[2]) * binning))])] = [float(line.split()[0]) * binning,
+                                                                              float(line.split()[2]) * binning,
+                                                                              float(line.split()[2]) * binning]
 
         os.remove("tmp_model_coords.txt")
 
@@ -88,11 +96,20 @@ class SelCmmModStar:
             particles.append(particle)
         return particles
 
-    def selParticles(self, particles, selectedParticlesCoords):
+    def selParticles(self, particles, selectedParticlesCoords, apix):
         newParticles = []
         for particle in particles:
-            if [int(round(particle.rlnCoordinateX)), int(round(particle.rlnCoordinateY)),
-                int(round(particle.rlnCoordinateZ))] in selectedParticlesCoords:
+            if tuple([int(round(particle.rlnCoordinateX)), int(round(particle.rlnCoordinateY)),
+                      int(round(particle.rlnCoordinateZ))]) in selectedParticlesCoords:
+                particle.rlnOriginXAngst = particle.rlnCoordinateX * apix - selectedParticlesCoords[
+                    tuple([int(round(particle.rlnCoordinateX)), int(round(particle.rlnCoordinateY)),
+                           int(round(particle.rlnCoordinateZ))])][0]
+                particle.rlnOriginYAngst = particle.rlnCoordinateY * apix - selectedParticlesCoords[
+                    tuple([int(round(particle.rlnCoordinateX)), int(round(particle.rlnCoordinateY)),
+                           int(round(particle.rlnCoordinateZ))])][1]
+                particle.rlnOriginZAngst = particle.rlnCoordinateZ * apix - selectedParticlesCoords[
+                    tuple([int(round(particle.rlnCoordinateX)), int(round(particle.rlnCoordinateY)),
+                           int(round(particle.rlnCoordinateZ))])][2]
                 newParticles.append(particle)
         print(str(len(newParticles)) + " particles included in selection.")
         return newParticles
@@ -115,6 +132,9 @@ class SelCmmModStar:
         for optic_group in md.data_optics:
             optic_groups.append(optic_group)
 
+        # get unbinned apix from star file
+        apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
+
         if args.cmm != '':
             print("Selecting particles from star file according to matching particle coordinates listed in cmm file...")
             selectedParticlesCoords = self.readCmmFile(args.cmm)
@@ -122,7 +142,7 @@ class SelCmmModStar:
             print("Selecting particles from star file according to matching particle coordinates listed in mod file...")
             selectedParticlesCoords = self.readModFile(args.mod, args.bin)
 
-        new_particles.extend(self.selParticles(particles, selectedParticlesCoords))
+        new_particles.extend(self.selParticles(particles, selectedParticlesCoords, apix))
 
         if md.version == "3.1":
             mdOut.version = "3.1"
@@ -135,6 +155,12 @@ class SelCmmModStar:
 
         mdOut.addDataTable(particleTableName)
         mdOut.addLabels(particleTableName, md.getLabels(particleTableName))
+        if 'rlnOriginXAngst' not in mdOut.getLabels():
+            mdOut.addLabels(particleTableName, 'rlnOriginXAngst')
+        if 'rlnOriginYAngst' not in mdOut.getLabels():
+            mdOut.addLabels(particleTableName, 'rlnOriginYAngst')
+        if 'rlnOriginZAngst' not in mdOut.getLabels():
+            mdOut.addLabels(particleTableName, 'rlnOriginZAngst')
         mdOut.addData(particleTableName, new_particles)
         mdOut.write(args.o)
 
