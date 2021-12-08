@@ -56,15 +56,15 @@ def writeMrcFile(np.ndarray[DTYPE_t, ndim=1] mrcData, stencilFile, outFile):
 def writeCmmFile(cmm_coordinates, outputCmmFile, inputMapMaxX, apix, mapOriginX, mapOriginY, mapOriginZ):
     with open(outputCmmFile, 'w') as cmmFile:
         cmmFile.write("<marker_set name=\"marker set 1\">\n")
-        id = 1
+        cmm_id = 1
         for coordinate in cmm_coordinates:
             cmmFile.write(
                 "<marker id=\"%d\" x=\"%0.3f\" y=\"%0.3f\" z=\"%0.3f\" r=\"%0.3f\" g=\"%0.3f\" b=\"%0.3f\" radius=\"%f\" coordX=\"%0.3fpx\" coordY=\"%0.3fpx\" coordZ=\"%0.3fpx\"/> \n" % (
-                    id, -coordinate[0] + coordinate[3] * apix + mapOriginX,
+                    cmm_id, -coordinate[0] + coordinate[3] * apix + mapOriginX,
                     -coordinate[1] + coordinate[4] * apix + mapOriginY,
                     -coordinate[2] + coordinate[5] * apix + mapOriginZ, coordinate[6][0],
                     coordinate[6][1], coordinate[6][2], inputMapMaxX / 6, coordinate[3], coordinate[4], coordinate[5]))
-            id += 1
+            cmm_id += 1
         cmmFile.write("</marker_set>")
 
 @cython.boundscheck(False)
@@ -180,8 +180,8 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
 @cython.wraparound(False)
 @cython.nonecheck(False)
 @cython.cdivision(True)
-def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, binning,
-                    placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend):
+def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, binning,
+                    bint placePartialVolumes, recenter, coloringLabel, bint outputColorMap, float colorMapTreshold, int colorMapExtend):
     #read in star file
     md = MetaData(inputStarFile)
     particles = []
@@ -255,15 +255,6 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     #initialize outputMapArray array
     cdef np.ndarray[DTYPE_t, ndim=1] outputMapArray = np.full((mapMaxX * mapMaxY * mapMaxZ), 0.0, dtype=DTYPE)
 
-    cdef bint makeColorMap = False
-    cdef bint makeCmm = False
-
-    #convert python boolean to bint
-    if outputColorMap:
-        makeColorMap = True
-    if outputCmm:
-        makeCmm = True
-
     cdef np.ndarray[DTYPE_t, ndim=1] outputColorMapArray = np.full((mapMaxX * mapMaxY * mapMaxZ), 0.0, dtype=DTYPE)
 
     cdef int nrOfParticles = len(particles)
@@ -272,8 +263,6 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     total_start = time.perf_counter()
     mapToRotate = readMrcData(inputVolumeToPlace)
 
-    cdef float colorMapTreshold_c = colorMapTreshold
-    cdef int colorMapExtend_c = int(colorMapExtend)
     cdef float coloringValue
     cdef float xpos, ypos, zpos
     cdef int pixPos, origX, origY, origZ, newX, newY, newZ, x_extend, y_extend, z_extend
@@ -299,7 +288,7 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
         if coloringLabel != "":
             coloringValue = round(float(getattr(particle, coloringLabel)) * 100) / 100
 
-        if makeCmm:
+        if  outputCmm:
             #color value index in raibowArray
             if coloringLabel != "":
                 colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
@@ -344,11 +333,11 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
                     elif outputMapArray[newX + newY * mapMaxX + newZ * mapMaxX * mapMaxY] < pixel:
                         outputMapArray[newX + newY * mapMaxX + newZ * mapMaxX * mapMaxY] = pixel
 
-                    if makeColorMap:
-                        if pixel >= colorMapTreshold_c:
-                            for x_extend in range(newX-colorMapExtend_c, newX+colorMapExtend_c, 1):
-                                for y_extend in range(newY - colorMapExtend_c, newY + colorMapExtend_c, 1):
-                                    for z_extend in range(newZ - colorMapExtend_c, newZ + colorMapExtend_c, 1):
+                    if outputColorMap:
+                        if pixel >= colorMapTreshold:
+                            for x_extend in range(newX-colorMapExtend, newX+colorMapExtend, 1):
+                                for y_extend in range(newY - colorMapExtend, newY + colorMapExtend, 1):
+                                    for z_extend in range(newZ - colorMapExtend, newZ + colorMapExtend, 1):
                                         if z_extend < mapMaxZ and y_extend < mapMaxY and x_extend < mapMaxX and z_extend >= 0 and y_extend >= 0 and x_extend >= 0:
                                             outputColorMapArray[x_extend + y_extend * mapMaxX + z_extend * mapMaxX * mapMaxY] = coloringValue
 
@@ -361,7 +350,7 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     writeMrcFile(outputMapArray, outputMapStencil, outputPrefix+".mrc")
     print("%s.mrc written." % outputPrefix)
 
-    if makeColorMap:
+    if outputColorMap:
         writeMrcFile(outputColorMapArray, outputMapStencil, outputPrefix+"_color.mrc")
         print("%s_color.mrc written." % outputPrefix)
 

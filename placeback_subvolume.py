@@ -85,7 +85,7 @@ class placebackSubvolume:
 
         colorMapTreshold = float(args.color_map_threshold)
 
-        colorMapExtend = float(args.color_map_extend)
+        colorMapExtend = int(float(args.color_map_extend))
 
         placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, binning,
                         placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend)
