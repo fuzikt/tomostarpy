@@ -25,9 +25,9 @@ class emcCSVtoStar:
         add('--mod', type=str, default="",
             help="Modfile used for filtering particles form the input csv. Note: Set the \"--modbin\" binnig factor used for template matching.")
         add('--modbin', type=str, default="1.00",
-            help="Binnig factor used for template matching. Needed only if modfile filtering is enabled.")
+            help="Binnig factor used for template matching. Needed only if modfile filtering is enabled. (Default 1)")
         add('--outbin', type=str, default="1.00",
-            help="Binnig factor used for output coordinates and mod files. NOT used for star file (always unbinned)!")
+            help="Binnig factor used for output coordinates and mod files. NOT used for star file (always unbinned)! (Default 1)")
         add('--cs', type=str, default="2.7",
             help="Cs value of the microscope. Used in opticsgroup in the output star file. (Default 2.7)")
         add('--kv', type=str, default="300.0",
