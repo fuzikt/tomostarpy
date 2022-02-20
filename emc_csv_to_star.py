@@ -29,9 +29,9 @@ class emcCSVtoStar:
         add('--outbin', type=str, default="1.00",
             help="Binnig factor used for output coordinates and mod files. NOT used for star file (always unbinned)!")
         add('--cs', type=str, default="2.7",
-            help="Cs value of the microscope. Used in opticsgroup in the output star file.")
+            help="Cs value of the microscope. Used in opticsgroup in the output star file. (Default 2.7)")
         add('--kv', type=str, default="300.0",
-            help="Accerelaton voltage of the microscope. Used in opticsgroup in the output star file.")
+            help="Accerelation voltage of the microscope. Used in opticsgroup in the output star file. (Default 300.0)")
         add('--apix', type=str, default="1.00",
             help="Apix of the unbinned tomogram. Used in opticsgroup in the output star file.")
 
