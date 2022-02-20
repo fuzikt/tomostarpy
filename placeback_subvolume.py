@@ -9,13 +9,13 @@ from argparse import RawTextHelpFormatter
 class placebackSubvolume:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Perform conversion from emClarity template matching csv file to Relion star file. It also recalculates the particle coordinates from emClarity partial tomogram to full tomogram.",
+            description="Performs placeback of a subvolumes into full tomogram volume according to the coordinates and euler angles defined in a star file.",
             formatter_class=RawTextHelpFormatter)
         add = self.parser.add_argument
         add('--i', help="Input star file file.")
         add('--isub', type=str, default="", help="Input file of sub-volume to be placed.")
         add('--itomo', type=str, default="",
-            help="Input file of the stencil tomogram. Size and origin is take from this file and applied on the output.")
+            help="Input file of the stencil tomogram. Size and origin is taken from this file and applied on the output.")
         add('--o', help="Output prefix")
         add('--cmm',  dest='cmm', action='store_true', default=False, help="Create Chimera cmm file with the coordinates of the placed sub-volumes.")
         add('--bin', type=str, default="0",
