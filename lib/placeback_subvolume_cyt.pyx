@@ -180,7 +180,7 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
 @cython.wraparound(False)
 @cython.nonecheck(False)
 @cython.cdivision(True)
-def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, binning,
+def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, tomoName, binning,
                     bint placePartialVolumes, recenter, coloringLabel, bint outputColorMap, float colorMapTreshold, int colorMapExtend):
     #read in star file
     md = MetaData(inputStarFile)
@@ -195,6 +195,14 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     #get unbinned apix from star file
     cdef float apix
     apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
+
+    if tomoName != "":
+        filteredParticles = []
+        for particle in particles:
+            if particle.rlnTomoName == tomoName:
+                filteredParticles.append(particle)
+        print("%s particles included in selection from %s tomogram." % (len(filteredParticles), tomoName))
+        particles = filteredParticles
 
     #get MRC size
     cdef int inputMapMaxX, inputMapMaxY, inputMapMaxZ

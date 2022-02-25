@@ -9,7 +9,7 @@ from argparse import RawTextHelpFormatter
 class placebackSubvolume:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Performs placeback of a subvolumes into full tomogram volume according to the coordinates and euler angles defined in a star file.",
+            description="Performs placeback of a subvolume into full tomogram volume according to the coordinates and euler angles defined in a star file.",
             formatter_class=RawTextHelpFormatter)
         add = self.parser.add_argument
         add('--i', help="Input star file file.")
@@ -18,6 +18,8 @@ class placebackSubvolume:
             help="Input file of the stencil tomogram. Size and origin is taken from this file and applied on the output.")
         add('--o', help="Output prefix")
         add('--cmm',  dest='cmm', action='store_true', default=False, help="Create Chimera cmm file with the coordinates of the placed sub-volumes.")
+        add('--tomo_name', type=str, default="",
+            help="Use only particles from tomogram equal in rlnTomoName. OPTIONAL: If not set all particles used in place-back")
         add('--bin', type=str, default="0",
             help="Binning factor of the stencil tomogram. If not provided calculated from MRC header and star file")
         add('--no_partial', dest='no_partial', action='store_true', default=False,
@@ -71,6 +73,7 @@ class placebackSubvolume:
         outputMapStencil = args.itomo
         outputPrefix = args.o
         outputCmm = args.cmm
+        tomoName = args.tomo_name
         binning = float(args.bin)
         if args.no_partial == False:
             placePartialVolumes = True
@@ -87,7 +90,7 @@ class placebackSubvolume:
 
         colorMapExtend = int(float(args.color_map_extend))
 
-        placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, binning,
+        placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
                         placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend)
 
 
