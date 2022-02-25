@@ -293,24 +293,6 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
             ypos = particle.rlnCoordinateY / coordinateBinningFactor
             zpos = particle.rlnCoordinateZ / coordinateBinningFactor
 
-        if coloringLabel != "":
-            coloringValue = round(float(getattr(particle, coloringLabel)) * 100) / 100
-
-        if  outputCmm:
-            #color value index in raibowArray
-            if coloringLabel != "":
-                colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
-            else:
-                colorIndex = 0
-            if recenter:
-                cmm_coordinates.append([particle.rlnOriginXAngst, particle.rlnOriginYAngst, particle.rlnOriginZAngst,
-                                        particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ,
-                                        rainbowArray[colorIndex]])
-            else:
-                cmm_coordinates.append(
-                    [0, 0, 0, particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ,
-                     rainbowArray[colorIndex]])
-
         rotatedMap = rotateVolume(mapToRotate, inputMapMaxX, inputMapMaxY, inputMapMaxZ, particle.rlnAngleRot,
                                   particle.rlnAngleTilt, particle.rlnAnglePsi)
 
@@ -323,6 +305,25 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
             progress = int(currentParticleNr / nrOfParticles * 20)
             sys.stdout.write("[%-20s] %d%%" % ('=' * progress, 5 * progress))
             sys.stdout.flush()
+
+            if coloringLabel != "":
+                coloringValue = round(float(getattr(particle, coloringLabel)) * 100) / 100
+
+            if outputCmm:
+                #color value index in raibowArray
+                if coloringLabel != "":
+                    colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
+                else:
+                    colorIndex = 0
+                if recenter:
+                    cmm_coordinates.append(
+                        [particle.rlnOriginXAngst, particle.rlnOriginYAngst, particle.rlnOriginZAngst,
+                         particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ,
+                         rainbowArray[colorIndex]])
+                else:
+                    cmm_coordinates.append(
+                        [0, 0, 0, particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ,
+                         rainbowArray[colorIndex]])
 
             pixPos = 0
             for pixPos in prange(rotatedMapArraySize, nogil=True):
