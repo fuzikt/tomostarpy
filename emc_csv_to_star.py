@@ -13,7 +13,7 @@ from argparse import RawTextHelpFormatter
 class emcCSVtoStar:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Perform conversion from emClarity template matching csv file to Relion star file. It also recalculates the particle coordinates from emClarity partial tomogram to full tomogram.",
+            description="Performs conversion from emClarity template matching csv file to Relion star file. It also recalculates the particle coordinates from emClarity partial tomogram to full tomogram.",
             formatter_class=RawTextHelpFormatter)
         add = self.parser.add_argument
         add('--i', help="Input emClarity csv file.")
