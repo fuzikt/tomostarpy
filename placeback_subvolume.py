@@ -25,7 +25,7 @@ class placebackSubvolume:
         add('--no_partial', dest='no_partial', action='store_true', default=False,
             help="Do not place partial volumes. If the subvolume is partially out of the output volume, it is not placed at all. This avoids \"half-cut\" sub-volumes in the output.")
         add('--recenter', dest='recenter', action='store_true', default=False,
-            help="Recenter the particles by subtracting rlnOriginX/Y/ZAngst from X/Y coordinates.")
+            help="Recenter the particles by subtracting rlnOriginX/Y/ZAngst from X/Y/Z coordinates.")
         add('--color_lb', type=str, default="",
             help="Label from the star file that will be used for rainbow coloring of the cmm markers.")
         add('--color_map',  dest='color_map', action='store_true', default=False, help="Create map with coloring values stored as pixel value.")
