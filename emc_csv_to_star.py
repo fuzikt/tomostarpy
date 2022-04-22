@@ -90,6 +90,8 @@ class emcCSVtoStar:
         width = 0
         slice1 = 0
         slice2 = 0
+        shift1 = 0
+        shift2 = 0
         with open(filename) as file:
             for line in file:
                 if "WIDTH" in line:
