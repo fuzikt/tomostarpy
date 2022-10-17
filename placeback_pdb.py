@@ -53,7 +53,7 @@ class placebackPDB:
         rotation_matrix = matrix_from_euler(rot, tilt, psi)
 
         for inputPDBline in inputPDB:
-            if "ATOM" in inputPDBline:
+            if inputPDBline.split()[0] == "ATOM":
                 if (inputPDBline[13:15] == "N " or inputPDBline[13:15] == "H " or   inputPDBline[13:15] == "CA" or  inputPDBline[13:15] == "HA" or inputPDBline[13:15] == "C " or inputPDBline[13:15] == "O ") or not backboneOnly:
                     X = float(inputPDBline[30:38]) - offset_x
                     Y = float(inputPDBline[38:46]) - offset_y
