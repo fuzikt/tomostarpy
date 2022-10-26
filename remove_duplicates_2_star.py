@@ -11,7 +11,7 @@ from argparse import RawTextHelpFormatter
 class FindInterstarDuplicates:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Remove duplicate particles appearing both in --i1 --i2 form --i2 and write result into --o",
+            description="Remove duplicate particles appearing both in --i1 --i2 form --i2 and write result into --o.",
             formatter_class=RawTextHelpFormatter)
         add = self.parser.add_argument
         add('--i1', help="Input1 STAR filename.")
@@ -78,8 +78,11 @@ class FindInterstarDuplicates:
         particles1 = self.get_particles(md1, dataTableName)
         particles2 = self.get_particles(md2, dataTableName)
 
+        print("%s particles in --i1" % str((len(particles1))))
+        print("%s particles in --i2" % str((len(particles2))))
+
         print(
-            "Finding duplicate particles between Input1 and Input2")
+            "Finding duplicate particles between Input1 and Input2....")
 
         if md2.version == "3.1":
             mdOut = deepcopy(md2)
@@ -90,10 +93,12 @@ class FindInterstarDuplicates:
 
         mdOut.addDataTable(dataTableName)
 
-        mdOut.addData(dataTableName, self.remove_interstar_duplicates(particles1, particles2, tolerance))
+        outParticles = self.remove_interstar_duplicates(particles1, particles2, tolerance)
 
-        print("%s particles were processed..." % str((len(particles1))))
+        mdOut.addLabels(dataTableName, md2.getLabels(dataTableName))
+        mdOut.addData(dataTableName, outParticles)
 
+        print("%s particles were non-duplicates..." % str((len(outParticles))))
         mdOut.write(args.o)
 
         print("New star file %s created. Have fun!" % args.o)
