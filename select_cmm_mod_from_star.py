@@ -122,8 +122,6 @@ class SelCmmModStar:
 
         md = MetaData(args.i)
 
-        mdOut = MetaData()
-
         new_particles = []
 
         particles = self.get_particles(md)
@@ -145,23 +143,22 @@ class SelCmmModStar:
         new_particles.extend(self.selParticles(particles, selectedParticlesCoords, apix))
 
         if md.version == "3.1":
-            mdOut.version = "3.1"
-            mdOut.addDataTable("data_optics")
-            mdOut.addLabels("data_optics", md.getLabels("data_optics"))
-            mdOut.addData("data_optics", getattr(md, "data_optics"))
-            particleTableName = "data_particles"
+            mdOut = md.clone()
+            dataTableName = "data_particles"
+            mdOut.removeDataTable(dataTableName)
         else:
-            particleTableName = "data_"
+            mdOut = MetaData()
+            dataTableName = "data_"
 
-        mdOut.addDataTable(particleTableName)
-        mdOut.addLabels(particleTableName, md.getLabels(particleTableName))
+        mdOut.addDataTable(dataTableName, md.isLoop(dataTableName))
+        mdOut.addLabels(dataTableName, md.getLabels(dataTableName))
         if 'rlnOriginXAngst' not in mdOut.getLabels():
-            mdOut.addLabels(particleTableName, 'rlnOriginXAngst')
+            mdOut.addLabels(dataTableName, 'rlnOriginXAngst')
         if 'rlnOriginYAngst' not in mdOut.getLabels():
-            mdOut.addLabels(particleTableName, 'rlnOriginYAngst')
+            mdOut.addLabels(dataTableName, 'rlnOriginYAngst')
         if 'rlnOriginZAngst' not in mdOut.getLabels():
-            mdOut.addLabels(particleTableName, 'rlnOriginZAngst')
-        mdOut.addData(particleTableName, new_particles)
+            mdOut.addLabels(dataTableName, 'rlnOriginZAngst')
+        mdOut.addData(dataTableName, new_particles)
         mdOut.write(args.o)
 
         print("New star file %s created. Have fun!" % args.o)

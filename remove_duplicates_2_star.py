@@ -84,17 +84,16 @@ class FindInterstarDuplicates:
         print(
             "Finding duplicate particles between Input1 and Input2....")
 
+        outParticles = self.remove_interstar_duplicates(particles1, particles2, tolerance)
+
         if md2.version == "3.1":
-            mdOut = deepcopy(md2)
+            mdOut = md2.clone()
             mdOut.removeDataTable(dataTableName)
         else:
             mdOut = MetaData()
             dataTableName = "data_"
 
-        mdOut.addDataTable(dataTableName)
-
-        outParticles = self.remove_interstar_duplicates(particles1, particles2, tolerance)
-
+        mdOut.addDataTable(dataTableName, md2.isLoop(dataTableName))
         mdOut.addLabels(dataTableName, md2.getLabels(dataTableName))
         mdOut.addData(dataTableName, outParticles)
 

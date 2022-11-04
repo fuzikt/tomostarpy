@@ -164,10 +164,10 @@ class emcCSVtoStar:
         # create output star file
         mdOut = MetaData()
         mdOut.version = "3.1"
-        mdOut.addDataTable("data_optics")
+        mdOut.addDataTable("data_optics", True)
         mdOut.addLabels("data_optics", "rlnOpticsGroup", "rlnOpticsGroupName", "rlnSphericalAberration", "rlnVoltage",
                         "rlnTomoTiltSeriesPixelSize")
-        mdOut.addDataTable("data_particles")
+        mdOut.addDataTable("data_particles", True)
         mdOut.addLabels("data_particles", ["rlnTomoName", "rlnCoordinateX", "rlnCoordinateY", "rlnCoordinateZ",
                                            "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi", "rlnOriginXAngst",
                                            "rlnOriginYAngst", "rlnOriginZAngst", "rlnCtfFigureOfMerit"])
