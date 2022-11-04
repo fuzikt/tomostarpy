@@ -34,15 +34,14 @@ LABELS = {
     'rlnComment': str,  # A metadata comment (This is treated in a special way)
     'rlnAreaId': int,  # ID (i.e. a unique number) of an area (i.e. field-of-view)
     'rlnAreaName': str,  # Name of an area (i.e. field-of-view)
-    'rlnBodyMaskName': str,  # Name of an image that contains a [0,1] body mask for multi-body refinement
+    'rlnBodyMaskName': str,  # Name of an image that contains a [0
     'rlnBodyKeepFixed': int,  # Flag to indicate whether to keep a body fixed (value 1) or keep on refining it (0)
     'rlnBodyReferenceName': str,
     # Name of an image that contains the initial reference for one body of a multi-body refinement
     'rlnBodyRotateDirectionX': float,  # X-component of axis around which to rotate this body
     'rlnBodyRotateDirectionY': float,  # Y-component of axis around which to rotate this body
     'rlnBodyRotateDirectionZ': float,  # Z-component of axis around which to rotate this body
-    'rlnBodyRotateRelativeTo': int,
-    # Number of the body relative to which this body rotates (if negative, use rlnBodyRotateDirectionXYZ)
+    'rlnBodyRotateRelativeTo': int,  # Number of the body relative to which this body rotates (if negative
     'rlnBodySigmaAngles': float,
     # Width of prior on all three Euler angles of a body in multibody refinement (in degrees)
     'rlnBodySigmaOffset': float,  # Width of prior on origin offsets of a body in multibody refinement (in pixels)
@@ -79,7 +78,7 @@ LABELS = {
     'rlnInnerCircleKurt': float,
     # Pixel value kurtosis (4th moment) of the smaller circular area specified by inner / outer radius
     'rlnClassScore': float,  # Class score calculated based on estimated resolution and selection label
-    'rlnJobScore': float,  # Overall score of this 2D classification job, read from the job score file.
+    'rlnJobScore': float,  # Overall score of this 2D classification job
     'rlnFftMean': float,  # Mean of Fourier components (amplitude only) up to resolution limit.
     'rlnFftStddev': float,  # Standard deviation of Fourier components (amplitude only) up to resolution limit.
     'rlnFftSkew': float,  # Skewness of Fourier components (amplitude only) up to resolution limit.
@@ -96,7 +95,7 @@ LABELS = {
     'rlnSolventStddev': float,  # Standard deviation of solvent region.
     'rlnSolventSkew': float,  # Skewness of solvent region.
     'rlnSolventKurt': float,  # Kurtosis of solvent region.
-    'rlnRelativeSignalIntensity': float,  # Sum of protein areas individual pixel values subtracting solvent area mean.
+    'rlnRelativeSignalIntensity': float,  # Sum of protein area's individual pixel values subtracting solvent area mean.
     'rlnScatteredSignal': float,  # Ratio of excluded white pixels when making the protein mask.
     'rlnEdgeSignal': float,  # Ratio of white pixels on the edge in the protein mask.
     'rlnProteinCAR': float,  # Circumference to area ratio of protein area (relative to a perfect circle).
@@ -126,8 +125,8 @@ LABELS = {
     'rlnCtfValidationScore': float,  # Gctf-based validation score for the quality of the CTF fit
     'rlnCtfScalefactor': float,  # Linear scale-factor on the CTF (values between 0 and 1)
     'rlnVoltage': float,  # Voltage of the microscope (in kV)
-    'rlnDefocusU': float,  # Defocus in U-direction (in Angstroms, positive values for underfocus)
-    'rlnDefocusV': float,  # Defocus in V-direction (in Angstroms, positive values for underfocus)
+    'rlnDefocusU': float,  # Defocus in U-direction (in Angstroms
+    'rlnDefocusV': float,  # Defocus in V-direction (in Angstroms
     'rlnDefocusAngle': float,  # Angle between X and defocus U direction (in degrees)
     'rlnSphericalAberration': float,  # Spherical aberration (in millimeters)
     'rlnChromaticAberration': float,  # Chromatic aberration (in millimeters)
@@ -142,13 +141,14 @@ LABELS = {
     'rlnConvergenceCone': float,  # Convergence cone (in mrad)
     'rlnLongitudinalDisplacement': float,  # Longitudinal displacement (in Angstroms)
     'rlnTransversalDisplacement': float,  # Transversal displacement (in Angstroms)
-    'rlnAmplitudeContrast': float,  # Amplitude contrast (as a fraction, i.e. 10% = 0.1)
+    'rlnAmplitudeContrast': float,  # Amplitude contrast (as a fraction
     'rlnCtfValue': float,  # Value of the Contrast Transfer Function
     'rlnImageName': str,  # Name of an image
     'rlnImageOriginalName': str,  # Original name of an image
     'rlnReconstructImageName': str,  # Name of an image to be used for reconstruction only
     'rlnImageId': int,  # ID (i.e. a unique number) of an image
-    'rlnDataType': int,  # Type of data stored in an image (e.g. int,
+    'rlnEnabled': bool,  # Not used in RELION
+    'rlnDataType': int,  # Type of data stored in an image (e.g. int
     'rlnImageDimensionality': int,  # Dimensionality of data stored in an image (i.e. 2 or 3)
     'rlnBeamTiltX': float,  # Beam tilt in the X-direction (in mrad)
     'rlnBeamTiltY': float,  # Beam tilt in the Y-direction (in mrad)
@@ -158,13 +158,13 @@ LABELS = {
     'rlnOddZernike': str,  # Coefficients for the antisymmetrical Zernike polynomials
     'rlnEvenZernike': str,  # Coefficients for the symmetrical Zernike polynomials
     'rlnImagePixelSize': float,  # Pixel size (in Angstrom)
-    'rlnMagMat00': float,  # Anisotropic magnification matrix, element 1,1
-    'rlnMagMat01': float,  # Anisotropic magnification matrix, element 1,2
-    'rlnMagMat10': float,  # Anisotropic magnification matrix, element 2,1
-    'rlnMagMat11': float,  # Anisotropic magnification matrix, element 2,2
+    'rlnMagMat00': float,  # Anisotropic magnification matrix
+    'rlnMagMat01': float,  # Anisotropic magnification matrix
+    'rlnMagMat10': float,  # Anisotropic magnification matrix
+    'rlnMagMat11': float,  # Anisotropic magnification matrix
     'rlnCoordinateX': float,  # X-Position of an image in a micrograph (in pixels)
     'rlnCoordinateY': float,  # Y-Position of an image in a micrograph (in pixels)
-    'rlnCoordinateZ': float,  # Z-Position of an image in a 3D micrograph, i.e. tomogram (in pixels)
+    'rlnCoordinateZ': float,  # Z-Position of an image in a 3D micrograph
     'rlnMovieFrameNumber': int,  # Number of a movie frame
     'rlnNormCorrection': float,  # Normalisation correction value for an image
     'rlnMagnificationCorrection': float,  # Magnification correction value for an image
@@ -183,7 +183,7 @@ LABELS = {
     'rlnSkewnessValue': float,  # Skewness (3rd moment) for the pixel values in an image
     'rlnKurtosisExcessValue': float,  # Kurtosis excess (4th moment - 3) for the pixel values in an image
     'rlnImageWeight': float,  # Relative weight of an image
-    'rlnMaskName': str,  # Name of an image that contains a [0,1] mask
+    'rlnMaskName': str,  # Name of an image that contains a [0
     'rlnJobIsContinue': bool,  # Is this a continuation job?
     'rlnJobIsTomo': bool,  # Is this a tomo job?
     'rlnJobType': int,  # Which type of job is this?
@@ -200,20 +200,20 @@ LABELS = {
     'rlnJobOptionFilePattern': str,  # Pattern for file browser of a joboption
     'rlnJobOptionDirectoryDefault': str,  # Default directory for file browser of a joboption
     'rlnJobOptionMenuOptions': str,  # Options for pull-down menu
-    'rlnMatrix_1_1': float,  # Matrix element (1,1) of a 3x3 matrix
-    'rlnMatrix_1_2': float,  # Matrix element (1,2) of a 3x3 matrix
-    'rlnMatrix_1_3': float,  # Matrix element (1,3) of a 3x3 matrix
-    'rlnMatrix_2_1': float,  # Matrix element (2,1) of a 3x3 matrix
-    'rlnMatrix_2_2': float,  # Matrix element (2,1) of a 3x3 matrix
-    'rlnMatrix_2_3': float,  # Matrix element (2,1) of a 3x3 matrix
-    'rlnMatrix_3_1': float,  # Matrix element (3,1) of a 3x3 matrix
-    'rlnMatrix_3_2': float,  # Matrix element (3,1) of a 3x3 matrix
-    'rlnMatrix_3_3': float,  # Matrix element (3,1) of a 3x3 matrix
-    'rlnAccumMotionTotal': float,  # Accumulated global motion during the entire movie (in A)
-    'rlnAccumMotionEarly': float,  # Accumulated global motion during the first frames of the movie (in A)
-    'rlnAccumMotionLate': float,  # Accumulated global motion during the last frames of the movie (in A)
-    'rlnMicrographCoordinates': str,
-    # Filename of a file (in .star, .box or .txt format) with X,Y (Z) coordinates of picked particles in micrographs/tomograms
+    'rlnMatrix_1_1': float,  # Matrix element (1
+    'rlnMatrix_1_2': float,  # Matrix element (1
+    'rlnMatrix_1_3': float,  # Matrix element (1
+    'rlnMatrix_2_1': float,  # Matrix element (2
+    'rlnMatrix_2_2': float,  # Matrix element (2
+    'rlnMatrix_2_3': float,  # Matrix element (2
+    'rlnMatrix_3_1': float,  # Matrix element (3
+    'rlnMatrix_3_2': float,  # Matrix element (3
+    'rlnMatrix_3_3': float,  # Matrix element (3
+    'rlnAccumMotionTotal': float,  # 'Accumulated global motion during the entire movie (in A)
+    'rlnAccumMotionEarly': float,  # 'Accumulated global motion during the first frames of the movie (in A)
+    'rlnAccumMotionLate': float,  # 'Accumulated global motion during the last frames of the movie (in A)
+    'rlnMicrographCoordinates': str,  # Filename of a file (in .star
+    'rlnMicrographIceThickness': float,  # Ice thickness (in Angstrom) of a micrograph
     'rlnMicrographId': int,  # ID (i.e. a unique number) of a micrograph
     'rlnMicrographName': str,  # Name of a micrograph
     'rlnMicrographGainName': str,  # Name of a gain reference
@@ -238,6 +238,7 @@ LABELS = {
     'rlnMicrographShiftY': float,  # Y shift of a (patch of) micrograph
     'rlnMotionModelCoeffsIdx': int,  # Index of a coefficient of a motion model
     'rlnMotionModelCoeff': float,  # A coefficient of a motion model
+    'rlnEERUpsampling': int,  # EER upsampling ratio (1 = 4K
     'rlnEERGrouping': int,  # The number of hardware frames to group
     'rlnAccuracyRotations': float,  # Estimated accuracy (in degrees) with which rotations can be assigned
     'rlnAccuracyTranslations': float,  # Estimated accuracy (in pixels) with which translations can be assigned
@@ -262,18 +263,17 @@ LABELS = {
     'rlnGroupScaleCorrection': float,  # Intensity-scale correction for a group of images
     'rlnNrHelicalAsymUnits': int,  # How many new helical asymmetric units are there in each box
     'rlnHelicalTwist': float,  # The helical twist (rotation per subunit) in degrees
-    'rlnHelicalTwistMin': float,  # Minimum helical twist (in degrees, + for right-handedness)
-    'rlnHelicalTwistMax': float,  # Maximum helical twist (in degrees, + for right-handedness)
+    'rlnHelicalTwistMin': float,  # Minimum helical twist (in degrees
+    'rlnHelicalTwistMax': float,  # Maximum helical twist (in degrees
     'rlnHelicalTwistInitialStep': float,  # Initial step of helical twist search (in degrees)
     'rlnHelicalRise': float,  # The helical rise (translation per subunit) in Angstroms
     'rlnHelicalRiseMin': float,  # Minimum helical rise (in Angstroms)
     'rlnHelicalRiseMax': float,  # Maximum helical rise (in Angstroms)
     'rlnHelicalRiseInitialStep': float,  # Initial step of helical rise search (in Angstroms)
     'rlnIsHelix': bool,  # Flag to indicate that helical refinement should be performed
-    'rlnFourierSpaceInterpolator': int,  # The kernel used for Fourier-space interpolation (NN=0, linear=1)
+    'rlnFourierSpaceInterpolator': int,  # The kernel used for Fourier-space interpolation (NN=0
     'rlnLogLikelihood': float,  # Value of the log-likelihood target function
-    'rlnMinRadiusNnInterpolation': int,
-    # Minimum radius for NN-interpolation (in Fourier pixels), for smaller radii linear int. is used
+    'rlnMinRadiusNnInterpolation': int,  # 'Minimum radius for NN-interpolation (in Fourier pixels)
     'rlnNormCorrectionAverage': float,  # Average value (over all images) of the normalisation correction values
     'rlnNrClasses': int,  # The number of references (i.e. classes) to be used in refinement
     'rlnNrBodies': int,  # The number of independent rigid bodies to be refined in multi-body refinement
@@ -293,13 +293,12 @@ LABELS = {
     # Probability Density Function of the orientations  (i.e. fraction of images assigned to each orient)
     'rlnPixelSize': float,  # Size of the pixels in the references and images (in Angstroms)
     'rlnReferenceSpectralPower': float,  # Spherical average of the power of the reference
-    'rlnOrientationalPriorMode': int,
-    # Mode for prior distributions on the orientations (0=no prior; 1=(rot,tilt,psi); 2=(rot,tilt); 3=rot; 4=tilt; 5=psi)
+    'rlnOrientationalPriorMode': int,  # Mode for prior distributions on the orientations (0=no prior; 1=(rot
     'rlnReferenceImage': str,  # Name of a reference image
     'rlnGradMoment1': str,  # Name of image containing the first moment of the gradient
     'rlnGradMoment2': str,  # Name of image containing the second moment of the gradient
-    'rlnSigmaOffsets': float,  # Standard deviation in the origin offsets (in pixels)
-    'rlnSigmaOffsetsAngst': float,  # Standard deviation in the origin offsets (in Angstroms)
+    'rlnSigmaOffsets': float,  # 'Standard deviation in the origin offsets (in pixels)
+    'rlnSigmaOffsetsAngst': float,  # 'Standard deviation in the origin offsets (in Angstroms)
     'rlnSigma2Noise': float,  # Spherical average of the standard deviation in the noise (sigma)
     'rlnReferenceSigma2': float,  # Spherical average of the estimated power in the noise of a reference
     'rlnSigmaPriorRotAngle': float,  # Standard deviation of the prior on the rot (i.e. first Euler) angle
@@ -314,8 +313,7 @@ LABELS = {
     'rlnOverallAccuracyTranslationsAngst': float,  # Overall accuracy of the translational assignments (in Angstroms)
     'rlnAdaptiveOversampleFraction': float,
     # Fraction of the weights that will be oversampled in a second pass of the adaptive oversampling strategy
-    'rlnAdaptiveOversampleOrder': int,
-    # Order of the adaptive oversampling (0=no oversampling, 1= 2x oversampling; 2= 4x oversampling, etc)
+    'rlnAdaptiveOversampleOrder': int,  # Order of the adaptive oversampling (0=no oversampling
     'rlnAutoLocalSearchesHealpixOrder': int,
     # Healpix order (before oversampling) from which autosampling procedure will use local angular searches
     'rlnAvailableMemory': float,  # Available memory per computing node (i.e. per MPI-process)
@@ -337,7 +335,7 @@ LABELS = {
     'rlnDoCorrectScale': bool,
     # Flag to indicate that internal (per-group) intensity-scale correction should be performed
     'rlnDoExternalReconstruct': bool,
-    # Flag to indicate that the reconstruction will be performed outside relion_refine, e.g. for learned priors
+    # Flag to indicate that the reconstruction will be performed outside relion_refine
     'rlnDoRealignMovies': bool,  # Flag to indicate that individual frames of movies are being re-aligned
     'rlnDoMapEstimation': bool,  # Flag to indicate that MAP estimation should be performed (otherwise ML estimation)
     'rlnDoGradientRefine': bool,  # Perform gradient refine.
@@ -386,7 +384,7 @@ LABELS = {
     'rlnSgdStepsizeScheme': str,  # Stepsize scheme used in gradient refinement
     'rlnTau2FudgeScheme': str,  # Tau2 fudge scheme for updating the tau2 fudge
     'rlnTau2FudgeArg': float,  # Tau2 fudge chosen by user
-    'rlnSgdStepsizeScheme': int,  # Maximum number of most significant poses & translations to consider
+    'rlnMaximumSignificantPoses': int,  # Maximum number of most significant poses & translations to consider
     'rlnDoAutoRefine': bool,  # Flag to indicate that 3D auto-refine procedure is being used
     'rlnDoAutoSampling': bool,  # Flag to indicate that auto-sampling is to be used (outside the auto-refine procedure)
     'rlnDoOnlyFlipCtfPhases': bool,  # Flag to indicate that CTF-correction should only comprise phase-flipping
@@ -396,11 +394,9 @@ LABELS = {
     # Flag to indicate that the references should be masked to set their solvent areas to a constant density
     'rlnDoSolventFscCorrection': bool,  # Flag to indicate that the FSCs should be solvent-corrected during refinement
     'rlnDoSkipAlign': bool,
-    # Flag to indicate that orientational (i.e. rotational and translational) searches will be omitted from the refinement, only marginalisation over classes will take place
-    'rlnDoSkipRotate': bool,
-    # Flag to indicate that rotational searches will be omitted from the refinement, only marginalisation over classes and translations will take place
-    'rlnDoSplitRandomHalves': bool,
-    # Flag to indicate that the data should be split into two completely separate, random halves
+    # Flag to indicate that orientational (i.e. rotational and translational) searches will be omitted from the refinement
+    'rlnDoSkipRotate': bool,  # Flag to indicate that rotational searches will be omitted from the refinement
+    'rlnDoSplitRandomHalves': bool,  # Flag to indicate that the data should be split into two completely separate
     'rlnDoZeroMask': bool,
     # Flag to indicate that the surrounding solvent area in the experimental particles will be masked to zeros (by default random noise will be used
     'rlnFixSigmaNoiseEstimates': bool,
@@ -454,8 +450,7 @@ LABELS = {
     'rlnNumberOfIterWithoutChangingAssignments': int,
     # Number of iterations that have passed without large changes in orientation and class assignments
     'rlnOpticsStarFile': str,  # STAR file with metadata for the optical groups (new as of version 3.1)
-    'rlnOutputRootName': str,
-    # Rootname for all output files (this may include a directory structure, which should then exist)
+    'rlnOutputRootName': str,  # Rootname for all output files (this may include a directory structure
     'rlnParticleDiameter': float,
     # Diameter of the circular mask to be applied to all experimental images (in Angstroms)
     'rlnRadiusMaskMap': int,  # Radius of the spherical mask to be applied to all references (in Angstroms)
@@ -470,7 +465,7 @@ LABELS = {
     # Smallest changes thus far in the optimal orientation assignments (in degrees).
     'rlnOrientSamplingStarFile': str,  # STAR file with metadata for the orientational sampling
     'rlnSolventMaskName': str,
-    # Name of an image that contains a (possibly soft) mask for the solvent area (values=0 for solvent, values =1 for protein)
+    # Name of an image that contains a (possibly soft) mask for the solvent area (values=0 for solvent
     'rlnSolventMask2Name': str,
     # Name of a secondary solvent mask (e.g. to flatten density inside an icosahedral virus)
     'rlnTauSpectrumName': str,  # Name of a STAR file that holds a tau2-spectrum
@@ -492,16 +487,14 @@ LABELS = {
     'rlnOriginXPriorAngst': float,  # Center of the prior on the X-coordinate (in Angstrom) for the origin of rotation
     'rlnOriginYPriorAngst': float,  # Center of the prior on the Y-coordinate (in Angstrom) for the origin of rotation
     'rlnOriginZPriorAngst': float,  # Center of the prior on the Z-coordinate (in Angstrom) for the origin of rotation
-    'rlnAngleRot': float,  # First Euler angle (rot, in degrees)
+    'rlnAngleRot': float,  # First Euler angle (rot
     'rlnAngleRotPrior': float,  # Center of the prior (in degrees) on the first Euler angle (rot)
-    'rlnAngleRotFlipRatio': float,
-    # Flip ratio of bimodal rot prior (0~0.5, 0 means an ordinary prior, 0.5 means a perfect bimodal prior)   // KThurber
-    'rlnAngleTilt': float,  # Second Euler angle (tilt, in degrees)
+    'rlnAngleRotFlipRatio': float,  # Flip ratio of bimodal rot prior (0~0.5
+    'rlnAngleTilt': float,  # Second Euler angle (tilt
     'rlnAngleTiltPrior': float,  # Center of the prior (in degrees) on the second Euler angle (tilt)
-    'rlnAnglePsi': float,  # Third Euler, or in-plane angle (psi, in degrees)
+    'rlnAnglePsi': float,  # Third Euler
     'rlnAnglePsiPrior': float,  # Center of the prior (in degrees) on the third Euler angle (psi)
-    'rlnAnglePsiFlipRatio': float,
-    # Flip ratio of bimodal psi prior (0~0.5, 0 means an ordinary prior, 0.5 means a perfect bimodal prior)
+    'rlnAnglePsiFlipRatio': float,  # Flip ratio of bimodal psi prior (0~0.5
     'rlnAnglePsiFlip': bool,  # Flag to indicate that psi prior angle has been flipped  // KThurber
     'rlnAutopickFigureOfMerit': float,  # Autopicking FOM for a particle
     'rlnHelicalTubeID': int,  # Helical tube ID for a helical segment
@@ -515,19 +508,18 @@ LABELS = {
     'rlnParticleId': int,  # ID (i.e. a unique number) for a particle
     'rlnParticleFigureOfMerit': float,  # Developmental FOM for a particle
     'rlnKullbackLeiblerDivergence': float,  # Kullback-Leibler divergence for a particle
-    'rlnKullbackLeibnerDivergence': float,  # Kullback-Leibler divergence for a particle
     'rlnRandomSubset': int,  # Random subset to which this particle belongs
     'rlnBeamTiltClass': int,  # Beam-tilt class of a particle
     'rlnParticleName': str,  # Name for a particle
     'rlnOriginalParticleName': str,  # Original name for a particles
     'rlnNrOfSignificantSamples': int,
-    # Number of orientational/class assignments (for a particle) with sign.probabilities in the 1st pass of adaptive oversampling /**< particle, Number of orientations contributing to weights*/
+    # Number of orientational/class assignments (for a particle) with sign.probabilities in the 1st pass of adaptive oversampling /**< particle
     'rlnNrOfFrames': int,  # Number of movie frames that were collected for this particle
     'rlnAverageNrOfFrames': int,  # Number of movie frames that one averages over upon extraction of movie-particles
     'rlnMovieFramesRunningAverage': int,
     # Number of movie frames inside the running average that will be used for movie-refinement
     'rlnMaxValueProbDistribution': float,
-    # Maximum value of the (normalised) probability function for a particle /**< particle, Maximum value of probability distribution */
+    # Maximum value of the (normalised) probability function for a particle /**< particle
     'rlnParticleNumber': int,  # Number of particles
     'rlnPipeLineJobCounter': int,  # Number of the last job in the pipeline
     'rlnPipeLineNodeName': str,  # Name of a Node in the pipeline
@@ -537,26 +529,20 @@ LABELS = {
     'rlnPipeLineProcessName': str,  # Name of a Process in the pipeline
     'rlnPipeLineProcessType': int,  # Type of a Process in the pipeline
     'rlnPipeLineProcessTypeLabel': str,  # Name for the Process type in the pipeline
-    'rlnPipeLineProcessStatus': int,
-    # Status of a Process in the pipeline (integer for running, scheduled, finished or cancelled)
-    'rlnPipeLineProcessStatusLabel': str,
-    # Name for the status of a Process in the pipeline (running, scheduled, finished or cancelled)
+    'rlnPipeLineProcessStatus': int,  # Status of a Process in the pipeline (integer for running
+    'rlnPipeLineProcessStatusLabel': str,  # Name for the status of a Process in the pipeline (running
     'rlnPipeLineEdgeFromNode': str,  # Name of the origin of an edge
     'rlnPipeLineEdgeToNode': str,  # Name of the to-Node in an edge
     'rlnPipeLineEdgeProcess': str,  # Name of the destination of an edge
     'rlnFinalResolution': float,  # Final estimated resolution after postprocessing (in Angstroms)
     'rlnBfactorUsedForSharpening': float,  # Applied B-factor in the sharpening of the map
-    'rlnParticleBoxFractionMolecularWeight': float,
-    # Fraction of protein voxels in the box, based on ordered molecular weight estimate, for calculating cisTEM-like part_FSC
-    'rlnParticleBoxFractionSolventMask': float,
-    # Fraction of protein voxels in the box, based on the solvent mask, for calculating cisTEM-like part_FSC
-    'rlnFourierShellCorrelation': float,  # FSC value (of unspecified type, e.g. masked or unmasked)
+    'rlnParticleBoxFractionMolecularWeight': float,  # Fraction of protein voxels in the box
+    'rlnParticleBoxFractionSolventMask': float,  # Fraction of protein voxels in the box
+    'rlnFourierShellCorrelation': float,  # FSC value (of unspecified type
     'rlnFourierShellCorrelationCorrected': float,
     # Final FSC value: i.e. after correction based on masking of randomized-phases maps
-    'rlnFourierShellCorrelationParticleMolWeight': float,
-    # CisTEM-like correction of unmasked FSCs, based on ordered molecular weight estimate
-    'rlnFourierShellCorrelationParticleMaskFraction': float,
-    # CisTEM-like correction of unmasked FSCs, based on fraction of white pixels in solvent mask
+    'rlnFourierShellCorrelationParticleMolWeight': float,  # CisTEM-like correction of unmasked FSCs
+    'rlnFourierShellCorrelationParticleMaskFraction': float,  # CisTEM-like correction of unmasked FSCs
     'rlnFourierShellCorrelationMaskedMaps': float,  # FSC value after masking of the original maps
     'rlnFourierShellCorrelationUnmaskedMaps': float,  # FSC value before masking of the original maps
     'rlnCorrectedFourierShellCorrelationPhaseRandomizedMaskedMaps': float,
@@ -590,12 +576,10 @@ LABELS = {
     'rlnPostprocessedMap': str,  # Name of the postprocssed map
     'rlnPostprocessedMapMasked': str,  # Name of the masked postprocssed map
     'rlnIs3DSampling': bool,  # Flag to indicate this concerns a 3D sampling
-    'rlnIs3DTranslationalSampling': bool,  # Flag to indicate this concerns a x,y,z-translational sampling
-    'rlnHealpixOrder': int,  # Healpix order for the sampling of the first two Euler angles (rot, tilt) on the 3D sphere
-    'rlnHealpixOrderOriginal': int,
-    # Original healpix order for the sampling of the first two Euler angles (rot, tilt) on the 3D sphere
-    'rlnTiltAngleLimit': float,
-    # Values to which to limit the tilt angles (positive for keeping side views, negative for keeping top views)
+    'rlnIs3DTranslationalSampling': bool,  # Flag to indicate this concerns a x
+    'rlnHealpixOrder': int,  # Healpix order for the sampling of the first two Euler angles (rot
+    'rlnHealpixOrderOriginal': int,  # Original healpix order for the sampling of the first two Euler angles (rot
+    'rlnTiltAngleLimit': float,  # Values to which to limit the tilt angles (positive for keeping side views
     'rlnOffsetRange': float,  # Search range for the origin offsets (in Angstroms)
     'rlnOffsetStep': float,  # Step size for the searches in the origin offsets (in Angstroms)
     'rlnOffsetRangeOriginal': float,  # Original search range for the origin offsets (in Angstroms)
@@ -607,11 +591,11 @@ LABELS = {
     'rlnPsiStep': float,  # Step size (in degrees) for the sampling of the in-plane rotation angle (psi)
     'rlnPsiStepOriginal': float,
     # Original step size (in degrees) for the sampling of the in-plane rotation angle (psi)
-    'rlnSymmetryGroup': str,  # Symmetry group (e.g., C1, D7, I2, I5, etc.)
+    'rlnSymmetryGroup': str,  # Symmetry group (e.g.
     'rlnSchemeEdgeNumber': int,  # Numbered index of an edge inside a Scheme
     'rlnSchemeEdgeInputNodeName': str,  # Name of the input Node for a schedule Edge
     'rlnSchemeEdgeOutputNodeName': str,  # Name of the output Node for a schedule Edge
-    'rlnSchemeEdgeIsFork': bool,  # Flag to indicate that this Edge is a Fork, dependent on a Boolean Scheme variable
+    'rlnSchemeEdgeIsFork': bool,  # Flag to indicate that this Edge is a Fork
     'rlnSchemeEdgeOutputNodeNameIfTrue': str,
     # Name of the output Node for a schedule Fork if the associated Boolean is True
     'rlnSchemeEdgeBooleanVariable': str,  # Name of the associated Boolean variable if this Edge is a Fork
@@ -646,7 +630,7 @@ LABELS = {
     'rlnPerFrameRelativeWeight': float,  # The resolution-dependent relative weights for a given frame
     'rlnResolution': float,  # Resolution (in 1/Angstroms)
     'rlnAngstromResolution': float,  # Resolution (in Angstroms)
-    'rlnResolutionInversePixel': float,  # Resolution (in 1/pixel, Nyquist = 0.5)
+    'rlnResolutionInversePixel': float,  # Resolution (in 1/pixel
     'rlnSpectralIndex': int,  # Spectral index (i.e. distance in pixels to the origin in Fourier space)
     'rlnTomoName': str,  # Arbitrary name for a tomogram
     'rlnTomoTiltSeriesName': str,  # Tilt series file name
@@ -661,9 +645,9 @@ LABELS = {
     'rlnTomoHand': float,  # Handedness of a tomogram (i.e. slope of defocus over the image-space z coordinate)
     'rlnTomoFiducialsStarFile': str,  # STAR file containing the 3D locations of fiducial markers
     'rlnTomoTiltSeriesPixelSize': float,  # Pixel size of the original tilt series
-    'rlnTomoSubtomogramRot': float,  # First Euler angle of a subtomogram (rot, in degrees)
-    'rlnTomoSubtomogramTilt': float,  # Second Euler angle of a subtomogram (tilt, in degrees)
-    'rlnTomoSubtomogramPsi': float,  # Third Euler angle of a subtomogram (psi, in degrees)
+    'rlnTomoSubtomogramRot': float,  # First Euler angle of a subtomogram (rot
+    'rlnTomoSubtomogramTilt': float,  # Second Euler angle of a subtomogram (tilt
+    'rlnTomoSubtomogramPsi': float,  # Third Euler angle of a subtomogram (psi
     'rlnTomoSubtomogramBinning': float,  # Binning level of a subtomogram
     'rlnTomoParticleName': str,  # Name of each individual particle
     'rlnTomoParticleId': int,  # Unique particle index
@@ -745,15 +729,22 @@ class MetaData:
         else:
             self.clear()
 
+    def clone(self):
+        return copy.deepcopy(self)
+
     def clear(self):
         for attribute in dir(self):
             if "data_" in attribute and "_labels" not in attribute:
                 setattr(self, attribute + "_labels", OrderedDict())
                 setattr(self, attribute, [])
 
-    def addDataTable(self, dataTableName):
+    def addDataTable(self, dataTableName, loop=False):
         setattr(self, dataTableName + "_labels", OrderedDict())
+        setattr(self, dataTableName + "_loop", loop)
         setattr(self, dataTableName, [])
+
+    def removeDataTable(self, dataTableName):
+        delattr(self, dataTableName)
 
     def _setItemValue(self, item, label, value):
         setattr(item, label.name, label.type(value))
@@ -764,65 +755,99 @@ class MetaData:
     def read(self, input_star):
         self.clear()
         found_label = False
+        found_loop = False
+        non_loop_values = []
+
         f = open(input_star)
+
+        def setItemValues(currentTableRead, values):
+            # Iterate in pairs (zipping) over labels and values in the row
+            item = Item()
+            # Dynamically set values, using label type (str by default)
+            for label, value in izip(getattr(self, currentTableRead + "_labels").values(), values):
+                self._setItemValue(item, label, value)
+            getattr(self, currentTableRead).append(item)
 
         for line in f:
             values = line.strip().split()
 
+            if not values and found_label and not found_loop:  # empty lines after non-loop labels
+                setItemValues(currentTableRead, non_loop_values)
+                found_label = False
+                continue
+
             if not values:  # empty lines
                 continue
+
             if "#" in values[0]:
                 continue
 
             if "data_" in values[0]:
-                if values[0] == "data_optics":
+                if values[0] == "data_":
+                    self.version = "3"
+                else:
                     self.version = "3.1"
                 self.addDataTable(values[0])
                 currentTableRead = values[0]
                 found_label = False
+                found_loop = False
+                non_loop_values = []
+                continue
+
+            if values[0].startswith('loop_'):  # Label line
+                setattr(self, currentTableRead + "_loop", True)
+                found_loop = True
                 continue
 
             if values[0].startswith('_rln'):  # Label line
                 # Skip leading underscore in label name
                 self._addLabel(currentTableRead, labelName=values[0][1:])
+                if not found_loop:
+                    non_loop_values.append(values[1])
                 found_label = True
-
             elif found_label:  # Read data lines after at least one label
-                # Iterate in pairs (zipping) over labels and values in the row
-                item = Item()
-                # Dynamically set values, using label type (str by default)
-
-                for label, value in izip(getattr(self, currentTableRead + "_labels").values(), values):
-                    self._setItemValue(item, label, value)
-                getattr(self, currentTableRead).append(item)
+                setItemValues(currentTableRead, values)
 
         f.close()
 
     def _write(self, output_file):
         # Write labels and prepare the line format for rows
         for attribute in dir(self):
-            if "data_" in attribute and "_labels" not in attribute:
+            if "data_" in attribute and "_labels" not in attribute and "_loop" not in attribute:
                 line_format = ""
                 if self.version == "3.1":
-                    output_file.write("\n# version 30001\n\n%s\n\nloop_\n" % attribute)
+                    if "_loop" not in attribute:
+                        output_file.write("\n# version 30001\n\n%s\n\n" % attribute)
+                    if getattr(self, attribute + "_loop"):
+                        output_file.write("loop_\n")
                 else:
                     output_file.write("\n%s\n\nloop_\n" % attribute)
 
                 for i, l in enumerate(getattr(self, attribute + "_labels").values()):
-                    output_file.write("_%s #%d \n" % (l.name, i + 1))
                     # Retrieve the type of the label
                     t = l.type
-                    if t is float:
-                        line_format += "%%(%s)f \t" % l.name
-                    elif t is int:
-                        line_format += "%%(%s)d \t" % l.name
+                    if getattr(self, attribute + "_loop"):
+                        output_file.write("_%s #%d \n" % (l.name, i + 1))
+                        if t is float:
+                            line_format += "%%(%s)f \t" % l.name
+                        elif t is int:
+                            line_format += "%%(%s)d \t" % l.name
+                        else:
+                            line_format += "%%(%s)s \t" % l.name
                     else:
-                        line_format += "%%(%s)s \t" % l.name
+                        if t is float:
+                            line_format = "_%-35s%15f\n"
+                        elif t is int:
+                            line_format = "_%-35s%15d\n"
+                        else:
+                            line_format = "_%-35s%15s\n"
+                        output_file.write(line_format % (l.name, getattr(getattr(self, attribute)[0], l.name)))
 
-                line_format += '\n'
+                if getattr(self, attribute + "_loop"):
+                    line_format += '\n'
 
-                for item in getattr(self, attribute):
-                    output_file.write(line_format % item.__dict__)
+                    for item in getattr(self, attribute):
+                        output_file.write(line_format % item.__dict__)
 
     def write(self, output_star):
         output_file = open(output_star, 'w')
@@ -850,6 +875,9 @@ class MetaData:
         else:
             for item in self.data_:
                 yield item
+
+    def isLoop(self, dataTableName="data_particles"):
+        return getattr(self, dataTableName + "_loop")
 
     def getLabels(self, dataTableName="data_particles"):
         return [l.name for l in getattr(self, dataTableName + "_labels").values()]
