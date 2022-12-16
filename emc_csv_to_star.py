@@ -34,6 +34,10 @@ class emcCSVtoStar:
             help="Accerelation voltage of the microscope. Used in opticsgroup in the output star file. (Default 300.0)")
         add('--apix', type=str, default="1.00",
             help="Apix of the unbinned tomogram. Used in opticsgroup in the output star file.")
+        add('--xtilt', type=str, default="0.00",
+            help="Tomo X axis tilt in degrees. (Default: 0)")
+        add('--ytilt', type=str, default="0.00",
+            help="Tomo Y axis tilt in degrees. (Default: 0)")
 
     def usage(self):
         self.parser.print_help()
@@ -111,6 +115,8 @@ class emcCSVtoStar:
                     fullimage2 = float(re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line)[1])
         if width == 0:
             width = fullimage1
+        if slice2 == 0:
+            slice2 = fullimage2
 
         return width, slice1, slice2, thickness, shift1, shift2, xaxistilt
 
@@ -224,6 +230,8 @@ class emcCSVtoStar:
         csValue = float(args.cs)
         acVolatage = float(args.kv)
         apix = float(args.apix)
+        Xtilt = float(args.xtilt)
+        Ytilt = float(args.ytilt)
 
         outputCoordinatesBinning = float(args.outbin)
 
@@ -245,6 +253,9 @@ class emcCSVtoStar:
         offset_y = origSLICE1 - newSLICE1
         offset_z = ((newTHICKNESS - origTHICKNESS) / 2 + origSHIFT2 - newSHIFT2)
 
+        tomoWidth = newWIDTH
+        tomoHeight = newSLICE2 - newSLICE1
+
         if selectedParticleMODFile != "":
             print("Selecting particles according to input mod file....")
             selectedEmCparticles = []
@@ -262,6 +273,14 @@ class emcCSVtoStar:
             emCparticle[x_ind] = float(emCparticle[x_ind]) + offset_x
             emCparticle[y_ind] = float(emCparticle[y_ind]) + offset_y
             emCparticle[z_ind] = float(emCparticle[z_ind]) + offset_z
+            if Xtilt != 0:
+                dy = emCparticle[y_ind] - tomoHeight / 2
+                emCparticle[z_ind] = float(emCparticle[z_ind]) + dy * sin(radians(Xtilt))
+                emCparticle[y_ind] = tomoHeight / 2 + dy * cos(radians(Xtilt))
+            if Ytilt != 0:
+                dx = emCparticle[x_ind] - tomoWidth / 2
+                emCparticle[z_ind] = float(emCparticle[z_ind]) + dx * sin(radians(Ytilt))
+                emCparticle[x_ind] = tomoWidth / 2 + dx * cos(radians(Ytilt))
 
         self.writeCoordinateFile(outputCoordinateFile, emCparticles, outputCoordinatesBinning, x_ind, y_ind, z_ind)
         print("%s file written" % outputCoordinateFile)
