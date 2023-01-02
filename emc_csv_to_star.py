@@ -7,6 +7,8 @@ from math import *
 from lib.metadata import MetaData
 from lib.metadata import Item as starItem
 from lib.chimcmm import cmmData
+import lib.matrix2 as matrix2
+import lib.matrix3 as matrix3
 import argparse
 from argparse import RawTextHelpFormatter
 
@@ -217,7 +219,8 @@ class emcCSVtoStar:
     def writeCmmFile(self, outputCmmFile, apix, tomoName, emCparticles, x_ind, y_ind, z_ind):
         outCmmItems = cmmData(tomoName)
         for emCparticle in emCparticles:
-            outCmmItems.addItem(emCparticle[x_ind]*apix, emCparticle[y_ind]*apix, emCparticle[z_ind]*apix, float(emCparticle[0]), emCparticle[x_ind], emCparticle[y_ind], emCparticle[z_ind], 40)
+            outCmmItems.addItem(emCparticle[x_ind] * apix, emCparticle[y_ind] * apix, emCparticle[z_ind] * apix,
+                                float(emCparticle[0]), emCparticle[x_ind], emCparticle[y_ind], emCparticle[z_ind], 40)
         outCmmItems.writeCmmFile(outputCmmFile)
 
     def main(self):
@@ -263,6 +266,7 @@ class emcCSVtoStar:
 
         tomoWidth = newWIDTH
         tomoHeight = newSLICE2 - newSLICE1
+        tomoThickness = newTHICKNESS
 
         if selectedParticleMODFile != "":
             print("Selecting particles according to input mod file....")
@@ -281,22 +285,45 @@ class emcCSVtoStar:
             emCparticle[x_ind] = float(emCparticle[x_ind]) + offset_x
             emCparticle[y_ind] = float(emCparticle[y_ind]) + offset_y
             emCparticle[z_ind] = float(emCparticle[z_ind]) + offset_z
-            if Xtilt != 0:
-                dy = emCparticle[y_ind] - tomoHeight / 2
-                emCparticle[z_ind] = float(emCparticle[z_ind]) + dy * sin(radians(Xtilt))
-                emCparticle[y_ind] = tomoHeight / 2 + dy * cos(radians(Xtilt))
-            if Ytilt != 0:
-                dx = emCparticle[x_ind] - tomoWidth / 2
-                emCparticle[z_ind] = float(emCparticle[z_ind]) + dx * sin(radians(Ytilt))
-                emCparticle[x_ind] = tomoWidth / 2 + dx * cos(radians(Ytilt))
 
-        self.writeCoordinateFile(outputCoordinateFile, emCparticles, outputCoordinatesBinning, x_ind, y_ind, z_ind)
+            if Xtilt != 0 or Ytilt != 0:
+                dx = emCparticle[x_ind] - tomoWidth / 2
+                dy = emCparticle[y_ind] - tomoHeight / 2
+                dz = emCparticle[z_ind] - tomoThickness / 2
+
+                rot_m = matrix3.matrix_from_euler_xyz(radians(Xtilt), radians(Ytilt), 0)
+                emCparticle[x_ind] = tomoWidth / 2 + dx * rot_m.m[0][0] + dy * rot_m.m[0][1] + dz * rot_m.m[0][2]
+                emCparticle[y_ind] = tomoHeight / 2 + dx * rot_m.m[1][0] + dy * rot_m.m[1][1] + dz * rot_m.m[1][2]
+                emCparticle[z_ind] = tomoThickness / 2 + dx * rot_m.m[2][0] + dy * rot_m.m[2][1] + dz * rot_m.m[2][2]
+
+                particle_rot_matrix = matrix3.Matrix3(
+                    [float(emCparticle[r11]), float(emCparticle[r11 + 3]), float(emCparticle[r11 + 6]),
+                     float(emCparticle[r11 + 1]), float(emCparticle[r11 + 4]), float(emCparticle[r11 + 7]),
+                     float(emCparticle[r11 + 2]), float(emCparticle[r11 + 5]), float(emCparticle[r11 + 8])])
+
+                rotated_particle_matrix = matrix3.matrix_multiply(rot_m, particle_rot_matrix)
+
+                [emCparticle[r11], emCparticle[r11 + 3], emCparticle[r11 + 6],
+                 emCparticle[r11 + 1], emCparticle[r11 + 4], emCparticle[r11 + 7],
+                 emCparticle[r11 + 2], emCparticle[r11 + 5], emCparticle[r11 + 8]] = [rotated_particle_matrix.m[0][0],
+                                                                                      rotated_particle_matrix.m[0][1],
+                                                                                      rotated_particle_matrix.m[0][2],
+                                                                                      rotated_particle_matrix.m[1][0],
+                                                                                      rotated_particle_matrix.m[1][1],
+                                                                                      rotated_particle_matrix.m[1][2],
+                                                                                      rotated_particle_matrix.m[2][0],
+                                                                                      rotated_particle_matrix.m[2][1],
+                                                                                      rotated_particle_matrix.m[2][2]]
+
+        self.writeCoordinateFile(outputCoordinateFile, emCparticles, outputCoordinatesBinning, x_ind, y_ind,
+                                 z_ind)
         print("%s file written" % outputCoordinateFile)
 
         self.writeModFile(outputCoordinateModFile, outputCoordinateFile)
         print("%s file written" % outputCoordinateModFile)
 
-        self.writeStarFile(outputStarFile, csValue, acVolatage, apix, args.o, emCparticles, x_ind, y_ind, z_ind, r11)
+        self.writeStarFile(outputStarFile, csValue, acVolatage, apix, args.o, emCparticles, x_ind, y_ind, z_ind,
+                           r11)
         print("%s file written" % outputStarFile)
 
         self.writeCmmFile(outputCmmFile, apix, args.o, emCparticles, x_ind, y_ind, z_ind)
