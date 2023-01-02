@@ -126,6 +126,40 @@ def matrix_from_euler_zxz(rot, tilt, psi):
     return Matrix3(a)
 
 
+def matrix_from_euler_zyx(rot, tilt, psi):
+    #   """create a rotation matrix from three Euler anges in ZYX convention"""
+    a = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    a[0] = cos(rot) * cos(tilt)
+    a[1] = cos(rot) * sin(tilt) * sin(psi) - sin(rot) * cos(psi)
+    a[2] = cos(rot) * sin(tilt) * cos(psi) + sin(rot) * sin(psi)
+    a[3] = sin(rot) * cos(tilt)
+    a[4] = sin(rot) * sin(tilt) * sin(psi) + cos(rot) * cos(psi)
+    a[5] = sin(rot) * sin(tilt) * cos(psi) - cos(rot) * sin(psi)
+    a[6] = -sin(tilt)
+    a[7] = cos(tilt) * sin(psi)
+    a[8] = cos(tilt) * cos(psi)
+
+    return Matrix3(a)
+
+
+def matrix_from_euler_xyz(rot, tilt, psi):
+    #   """create a rotation matrix from three Euler anges in XYZ convention"""
+    a = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    a[0] = cos(tilt) * cos(psi)
+    a[1] = -cos(tilt) * sin(psi)
+    a[2] = sin(tilt)
+    a[3] = cos(rot) * sin(psi) + sin(rot) * sin(tilt) * cos(psi)
+    a[4] = cos(rot) * cos(psi) - sin(rot) * sin(tilt) * sin(psi)
+    a[5] = -sin(rot) * cos(tilt)
+    a[6] = sin(rot) * sin(psi) - cos(rot) * sin(tilt) * cos(psi)
+    a[7] = sin(rot) * cos(psi) + cos(rot) * sin(tilt) * sin(psi)
+    a[8] = cos(rot) * cos(tilt)
+
+    return Matrix3(a)
+
+
 def matrix_multiply(m1, m2):
     a = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     a[0] = m1.m[0][0] * m2.m[0][0] + m1.m[0][1] * m2.m[1][0] + m1.m[0][2] * m2.m[2][0]
