@@ -18,6 +18,8 @@ class doseSymOrderCSV:
             help="Number of consecutive positive tilts in output. Default: 2")
         add('--nr_neg', type=str, default="2",
             help="Number of consecutive negative tilts in output. Default: 2")
+        add('--pacetomo', dest='pacetomo', action='store_true', default=False,
+            help="Pace-tomo style dose symmetric (0, ++, --, ++, --.....)")
 
     def usage(self):
         self.parser.print_help()
@@ -35,6 +37,7 @@ class doseSymOrderCSV:
         if not os.path.exists(args.i):
             self.error("Input file '%s' not found."
                        % args.i)
+
     def main(self):
         self.define_parser()
         args = self.parser.parse_args()
@@ -48,18 +51,27 @@ class doseSymOrderCSV:
 
         with open(inFileName) as file:
             lines = file.readlines()
+            all_tilts = []
             negative_tilt = []
             positive_tilt = []
 
             for line in lines:
-                if float(line)<0:
-                    negative_tilt.append(float(line))
-                else:
-                    positive_tilt.append(float(line))
+                all_tilts.append(float(line))
+
+            nr_of_tilts = len(all_tilts)
+            for i in range(round(nr_of_tilts / 2)):
+                negative_tilt.append(all_tilts.pop(0))
+            if args.pacetomo:
+                zerotilt = all_tilts.pop(0)
+            for i in range(len(all_tilts)):
+                positive_tilt.append(all_tilts.pop(0))
 
         dosesym_ordered = []
 
-        while len(negative_tilt)>0 or len(positive_tilt)>0 :
+        if args.pacetomo:
+            dosesym_ordered.append(zerotilt)
+
+        while len(negative_tilt) > 0 or len(positive_tilt) > 0:
             for i in range(nrPosDirection):
                 if len(positive_tilt) > 0:
                     dosesym_ordered.append(positive_tilt.pop(0))
@@ -70,11 +82,12 @@ class doseSymOrderCSV:
         with open(outFileName, 'w') as outfile:
             i = 1
             for dosesym_item in dosesym_ordered:
-                outfile.write("%d, %.2f\n" %(i, dosesym_item))
+                outfile.write("%d, %.2f\n" % (i, dosesym_item))
                 i += 1
 
         print("File %s created." % outFileName)
         print("Have fun!")
+
 
 if __name__ == "__main__":
     doseSymOrderCSV().main()
