@@ -6,6 +6,7 @@ import subprocess
 from math import *
 from lib.metadata import MetaData
 from lib.metadata import Item as starItem
+from lib.chimcmm import cmmData
 import argparse
 from argparse import RawTextHelpFormatter
 
@@ -213,6 +214,12 @@ class emcCSVtoStar:
         mdOut.addData("data_particles", new_particles)
         mdOut.write(outputStarFile)
 
+    def writeCmmFile(self, outputCmmFile, apix, tomoName, emCparticles, x_ind, y_ind, z_ind):
+        outCmmItems = cmmData(tomoName)
+        for emCparticle in emCparticles:
+            outCmmItems.addItem(emCparticle[x_ind]*apix, emCparticle[y_ind]*apix, emCparticle[z_ind]*apix, float(emCparticle[0]), emCparticle[x_ind], emCparticle[y_ind], emCparticle[z_ind], 40)
+        outCmmItems.writeCmmFile(outputCmmFile)
+
     def main(self):
         self.define_parser()
         args = self.parser.parse_args()
@@ -225,6 +232,7 @@ class emcCSVtoStar:
         outputCoordinateFile = args.o + "_coords.txt"
         outputCoordinateModFile = args.o + "_coords.mod"
         outputStarFile = args.o + ".star"
+        outputCmmFile = args.o + ".cmm"
         originalTiltCom = args.reconsh
         newTiltCom = args.tiltcom
         csValue = float(args.cs)
@@ -290,6 +298,9 @@ class emcCSVtoStar:
 
         self.writeStarFile(outputStarFile, csValue, acVolatage, apix, args.o, emCparticles, x_ind, y_ind, z_ind, r11)
         print("%s file written" % outputStarFile)
+
+        self.writeCmmFile(outputCmmFile, apix, args.o, emCparticles, x_ind, y_ind, z_ind)
+        print("%s file written" % outputCmmFile)
 
         self.writeEmClarity(outputEmClarityCSV, emCparticles)
         print("%s file written" % outputEmClarityCSV)
