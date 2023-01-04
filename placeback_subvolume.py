@@ -17,7 +17,8 @@ class placebackSubvolume:
         add('--itomo', type=str, default="",
             help="Input file of the stencil tomogram. Size and origin is taken from this file and applied on the output.")
         add('--o', help="Output prefix")
-        add('--cmm',  dest='cmm', action='store_true', default=False, help="Create Chimera cmm file with the coordinates of the placed sub-volumes.")
+        add('--cmm', dest='cmm', action='store_true', default=False,
+            help="Create Chimera cmm file with the coordinates of the placed sub-volumes.")
         add('--tomo_name', type=str, default="",
             help="Use only particles from tomogram equal in rlnTomoName. OPTIONAL: If not set all particles used in place-back")
         add('--bin', type=str, default="0",
@@ -28,11 +29,16 @@ class placebackSubvolume:
             help="Recenter the particles by subtracting rlnOriginX/Y/ZAngst from X/Y/Z coordinates.")
         add('--color_lb', type=str, default="",
             help="Label from the star file that will be used for rainbow coloring of the cmm markers.")
-        add('--color_map',  dest='color_map', action='store_true', default=False, help="Create map with coloring values stored as pixel value.")
+        add('--color_map', dest='color_map', action='store_true', default=False,
+            help="Create map with coloring values stored as pixel value.")
         add('--color_map_threshold', type=str, default="0.01",
             help="Threshold value at which the contour of the --isub in the output color map should contain values")
         add('--color_map_extend', type=str, default="2",
             help="Extend the border around the threshold meeting value by this amount of pixels.")
+        add('--xtilt', type=str, default="0.00",
+            help="Tomo X axis tilt in degrees. (Default: 0)")
+        add('--ytilt', type=str, default="0.00",
+            help="Tomo Y axis tilt in degrees. (Default: 0)")
 
     def usage(self):
         self.parser.print_help()
@@ -60,7 +66,7 @@ class placebackSubvolume:
         if args.o == "":
             self.error("No output prefix was specified.")
 
-        if float(args.color_map_extend)<1:
+        if float(args.color_map_extend) < 1:
             self.error("--color_map_extend has to be a positive number.")
 
     def main(self):
@@ -90,8 +96,12 @@ class placebackSubvolume:
 
         colorMapExtend = int(float(args.color_map_extend))
 
+        Xtilt = float(args.xtilt)
+        Ytilt = float(args.ytilt)
+
         placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
-                        placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend)
+                        placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
+                        Xtilt, Ytilt)
 
 
 if __name__ == "__main__":

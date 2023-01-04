@@ -4,6 +4,9 @@ cimport numpy as np
 cimport cython
 from cython.parallel import prange
 from libc.math cimport sin, cos, M_PI, round
+from lib.euler import euler_from_matrix
+import lib.matrix3 as matrix3
+from lib.chimcmm import cmmData
 import struct
 import sys
 import time
@@ -53,20 +56,6 @@ def writeMrcFile(np.ndarray[DTYPE_t, ndim=1] mrcData, stencilFile, outFile):
         mrcFile.seek(1024, 0)
         mrcData.astype('float32').tofile(mrcFile)
 
-def writeCmmFile(cmm_coordinates, outputCmmFile, inputMapMaxX, apix, mapOriginX, mapOriginY, mapOriginZ):
-    with open(outputCmmFile, 'w') as cmmFile:
-        cmmFile.write("<marker_set name=\"marker set 1\">\n")
-        cmm_id = 1
-        for coordinate in cmm_coordinates:
-            cmmFile.write(
-                "<marker id=\"%d\" x=\"%0.3f\" y=\"%0.3f\" z=\"%0.3f\" r=\"%0.3f\" g=\"%0.3f\" b=\"%0.3f\" radius=\"%f\" coordX=\"%0.3fpx\" coordY=\"%0.3fpx\" coordZ=\"%0.3fpx\"/> \n" % (
-                    cmm_id, -coordinate[0] + coordinate[3] * apix + mapOriginX,
-                    -coordinate[1] + coordinate[4] * apix + mapOriginY,
-                    -coordinate[2] + coordinate[5] * apix + mapOriginZ, coordinate[6][0],
-                    coordinate[6][1], coordinate[6][2], inputMapMaxX / 6, coordinate[3], coordinate[4], coordinate[5]))
-            cmm_id += 1
-        cmmFile.write("</marker_set>")
-
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
@@ -87,7 +76,7 @@ cdef matrix_from_euler(DTYPE_t rot, DTYPE_t tilt, DTYPE_t psi):
     return m
 
 cdef DTYPE_t c_radians(DTYPE_t degree):
-    return degree * (M_PI / 180.0);
+    return degree * (M_PI / 180.0)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -102,7 +91,7 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
     cdef int rotatedX, rotatedY, rotatedZ
     cdef DTYPE_t origXi, origYi, origZi, pixelValue
 
-    # use inverse rotation matrix as we are looking for the origin of the rotated pixe vecto@cython.boundscheck(False)
+    # use inverse rotation matrix as we are looking for the origin of the rotated pixel vecto@cython.boundscheck(False)
     cdef np.ndarray[DTYPE_t, ndim=2] rotMatrixInv = np.linalg.inv(
         matrix_from_euler(c_radians(rot), c_radians(tilt), c_radians(psi)))
 
@@ -180,8 +169,10 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
 @cython.wraparound(False)
 @cython.nonecheck(False)
 @cython.cdivision(True)
-def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, tomoName, binning,
-                    bint placePartialVolumes, recenter, coloringLabel, bint outputColorMap, float colorMapTreshold, int colorMapExtend):
+def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, tomoName,
+                    binning,
+                    bint placePartialVolumes, recenter, coloringLabel, bint outputColorMap, float colorMapTreshold,
+                    int colorMapExtend, Xtilt, Ytilt):
     #read in star file
     md = MetaData(inputStarFile)
     particles = []
@@ -255,7 +246,7 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
 
     if recenter and not (
             hasattr(particles[0], 'rlnOriginXAngst') and hasattr(particles[0], 'rlnOriginYAngst') and hasattr(
-            particles[0], 'rlnOriginZAngst')):
+        particles[0], 'rlnOriginZAngst')):
         print(
             "WARNING: Recentering was enable but no rlnOriginXAngst/rlnOriginYAngst/rlnOriginZAngst in star file. Disabling recentering!")
         recenter = False
@@ -280,7 +271,10 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
                                                           dtype=DTYPE)
     cdef int rotatedMapArraySize = len(mapToRotate)
 
-    cmm_coordinates = []
+    if tomoName != "":
+        outCmmItems = cmmData(tomoName)
+    else:
+        outCmmItems = cmmData(inputStarFile[:-5])
 
     print("Placing %i subvolumes:" % nrOfParticles)
     for particle in particles:
@@ -293,8 +287,31 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
             ypos = particle.rlnCoordinateY / coordinateBinningFactor
             zpos = particle.rlnCoordinateZ / coordinateBinningFactor
 
-        rotatedMap = rotateVolume(mapToRotate, inputMapMaxX, inputMapMaxY, inputMapMaxZ, particle.rlnAngleRot,
-                                  particle.rlnAngleTilt, particle.rlnAnglePsi)
+        if Xtilt != 0 or Ytilt != 0:
+            dx = xpos - mapMaxX / 2
+            dy = ypos - mapMaxY / 2
+            dz = zpos - mapMaxZ / 2
+
+            rot_m = matrix3.matrix_from_euler_xyz(c_radians(Xtilt), c_radians(Ytilt), 0)
+            xpos = mapMaxX / 2 + dx * rot_m.m[0][0] + dy * rot_m.m[0][1] + dz * rot_m.m[0][2]
+            ypos = mapMaxY / 2 + dx * rot_m.m[1][0] + dy * rot_m.m[1][1] + dz * rot_m.m[1][2]
+            zpos = mapMaxZ / 2 + dx * rot_m.m[2][0] + dy * rot_m.m[2][1] + dz * rot_m.m[2][2]
+
+            particle_rot_matrix = matrix3.matrix_from_euler(c_radians(particle.rlnAngleRot),
+                                                            c_radians(particle.rlnAngleTilt),
+                                                            c_radians(particle.rlnAnglePsi))
+
+            rotated_particle_matrix = matrix3.matrix_multiply(rot_m, particle_rot_matrix)
+
+            angleRot, angleTilt, anglePsi = [angle_in_radian * 180.0 / M_PI for angle_in_radian in
+                                             euler_from_matrix(rotated_particle_matrix)]
+        else:
+            angleRot = particle.rlnAngleRot
+            angleTilt = particle.rlnAngleTilt
+            anglePsi = particle.rlnAnglePsi
+
+        rotatedMap = rotateVolume(mapToRotate, inputMapMaxX, inputMapMaxY, inputMapMaxZ, angleRot,
+                                  angleTilt, anglePsi)
 
         if ((round(xpos) + inputMapMaxX / 2) < mapMaxX and (round(ypos) + inputMapMaxY / 2) < mapMaxY and (
                 round(zpos) + inputMapMaxZ / 2) < mapMaxZ and (round(xpos) - inputMapMaxX / 2) >= 0 and (
@@ -308,22 +325,33 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
 
             if coloringLabel != "":
                 coloringValue = round(float(getattr(particle, coloringLabel)) * 100) / 100
+            else:
+                coloringValue = 0
 
             if outputCmm:
-                #color value index in raibowArray
-                if coloringLabel != "":
-                    colorIndex = int((coloringValue - minColor) / (maxColor - minColor) * (rangeColor - 1))
-                else:
-                    colorIndex = 0
                 if recenter:
-                    cmm_coordinates.append(
-                        [particle.rlnOriginXAngst, particle.rlnOriginYAngst, particle.rlnOriginZAngst,
-                         particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ,
-                         rainbowArray[colorIndex]])
-                else:
-                    cmm_coordinates.append(
-                        [0, 0, 0, particle.rlnCoordinateX, particle.rlnCoordinateY, particle.rlnCoordinateZ,
-                         rainbowArray[colorIndex]])
+                    particle.rlnCoordinateX -= particle.rlnOriginXAngst / apix
+                    particle.rlnCoordinateY -= particle.rlnOriginYAngst / apix
+                    particle.rlnCoordinateZ -= particle.rlnOriginZAngst / apix
+
+                if Xtilt != 0 or Ytilt != 0:
+                    dx = particle.rlnCoordinateX - mapMaxX * coordinateBinningFactor / 2
+                    dy = particle.rlnCoordinateY - mapMaxY * coordinateBinningFactor / 2
+                    dz = particle.rlnCoordinateZ - mapMaxZ * coordinateBinningFactor / 2
+
+                    rot_m = matrix3.matrix_from_euler_xyz(c_radians(Xtilt), c_radians(Ytilt), 0)
+                    particle.rlnCoordinateX = mapMaxX * coordinateBinningFactor / 2 + dx * rot_m.m[0][0] + dy * \
+                                              rot_m.m[0][1] + dz * rot_m.m[0][2]
+                    particle.rlnCoordinateY = mapMaxY * coordinateBinningFactor / 2 + dx * rot_m.m[1][0] + dy * \
+                                              rot_m.m[1][1] + dz * rot_m.m[1][2]
+                    particle.rlnCoordinateZ = mapMaxZ * coordinateBinningFactor / 2 + dx * rot_m.m[2][0] + dy * \
+                                              rot_m.m[2][1] + dz * rot_m.m[2][2]
+
+                outCmmItems.addItem(particle.rlnCoordinateX * apix, particle.rlnCoordinateY * apix,
+                                    particle.rlnCoordinateZ * apix,
+                                    coloringValue, particle.rlnCoordinateX, particle.rlnCoordinateY,
+                                    particle.rlnCoordinateZ,
+                                    inputMapMaxX * inputApix / 6)
 
             pixPos = 0
             for pixPos in prange(rotatedMapArraySize, nogil=True):
@@ -344,11 +372,12 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
 
                     if outputColorMap:
                         if pixel >= colorMapTreshold:
-                            for x_extend in range(newX-colorMapExtend, newX+colorMapExtend, 1):
+                            for x_extend in range(newX - colorMapExtend, newX + colorMapExtend, 1):
                                 for y_extend in range(newY - colorMapExtend, newY + colorMapExtend, 1):
                                     for z_extend in range(newZ - colorMapExtend, newZ + colorMapExtend, 1):
                                         if z_extend < mapMaxZ and y_extend < mapMaxY and x_extend < mapMaxX and z_extend >= 0 and y_extend >= 0 and x_extend >= 0:
-                                            outputColorMapArray[x_extend + y_extend * mapMaxX + z_extend * mapMaxX * mapMaxY] = coloringValue
+                                            outputColorMapArray[
+                                                x_extend + y_extend * mapMaxX + z_extend * mapMaxX * mapMaxY] = coloringValue
 
         currentParticleNr += 1
 
@@ -356,15 +385,16 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     sys.stdout.write('\r\n')
 
     print("Writing MRC file...")
-    writeMrcFile(outputMapArray, outputMapStencil, outputPrefix+".mrc")
+    writeMrcFile(outputMapArray, outputMapStencil, outputPrefix + ".mrc")
     print("%s.mrc written." % outputPrefix)
 
     if outputColorMap:
-        writeMrcFile(outputColorMapArray, outputMapStencil, outputPrefix+"_color.mrc")
+        writeMrcFile(outputColorMapArray, outputMapStencil, outputPrefix + "_color.mrc")
         print("%s_color.mrc written." % outputPrefix)
 
     if outputCmm:
-        writeCmmFile(cmm_coordinates, outputPrefix + ".cmm", inputMapMaxX * inputApix, apix, mapOriginX, mapOriginY, mapOriginZ)
+        outCmmItems.writeCmmFile(outputPrefix + ".cmm")
         print("%s.cmm written." % outputPrefix)
+
     print("===>Total run time: %0.2f sec" % ((time.perf_counter() - total_start)))
     print("All done. Have fun!")
