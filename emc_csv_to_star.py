@@ -7,7 +7,6 @@ from math import *
 from lib.metadata import MetaData
 from lib.metadata import Item as starItem
 from lib.chimcmm import cmmData
-import lib.matrix2 as matrix2
 import lib.matrix3 as matrix3
 import argparse
 from argparse import RawTextHelpFormatter
