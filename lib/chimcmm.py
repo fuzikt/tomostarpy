@@ -1,6 +1,5 @@
-
 class cmmItem:
-    def __init__(self, x = 0, y = 0, z = 0, value=0, coordX = 0, coordY = 0, coordZ = 0, radius = 5, r=1, g=1, b=0):
+    def __init__(self, x=0, y=0, z=0, value=0, coordX=0, coordY=0, coordZ=0, radius=5, r=1, g=1, b=0):
         self.x = x
         self.y = y
         self.z = z
@@ -23,7 +22,7 @@ class cmmData:
             self.setName = setName
         self.cmmItems = []
 
-    def addItem(self, x, y, z, value=0, coordX = 0, coordY = 0, coordZ = 0, radius = 5, r=1, g=1, b=0):
+    def addItem(self, x, y, z, value=0, coordX=0, coordY=0, coordZ=0, radius=5, r=1, g=1, b=0):
         self.cmmItems.append(cmmItem(x, y, z, value, coordX, coordY, coordZ, radius, r, g, b))
 
     def createColorGradient(self):
@@ -42,7 +41,11 @@ class cmmData:
             maxColor = max(maxColor, item.value)
 
         for item in self.cmmItems:
-            coloringArrayElement = rainbowArray[int((item.value - minColor) / (maxColor - minColor) * (rangeColor - 1))]
+            if minColor != maxColor:
+                coloringArrayElement = rainbowArray[
+                    int((item.value - minColor) / (maxColor - minColor) * (rangeColor - 1))]
+            else:
+                coloringArrayElement = [1, 1, 0]
             self.cmmItems[self.cmmItems.index(item)].r = coloringArrayElement[0]
             self.cmmItems[self.cmmItems.index(item)].g = coloringArrayElement[1]
             self.cmmItems[self.cmmItems.index(item)].b = coloringArrayElement[2]
@@ -56,7 +59,8 @@ class cmmData:
             for item in self.cmmItems:
                 cmmFile.write(
                     "<marker id=\"%d\" x=\"%0.3f\" y=\"%0.3f\" z=\"%0.3f\" r=\"%0.3f\" g=\"%0.3f\" b=\"%0.3f\" radius=\"%f\" coordX=\"%0.3fpx\" coordY=\"%0.3fpx\" coordZ=\"%0.3fpx\"/> \n" % (
-                        cmm_id, item.x, item.y, item.z, item.r, item.g, item.b, item.radius, item.coordX, item.coordY, item.coordZ
-                        ))
+                        cmm_id, item.x, item.y, item.z, item.r, item.g, item.b, item.radius, item.coordX, item.coordY,
+                        item.coordZ
+                    ))
                 cmm_id += 1
             cmmFile.write("</marker_set>")
