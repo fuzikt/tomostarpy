@@ -24,8 +24,6 @@
 # **************************************************************************
 
 from math import *
-from .vector3 import *
-
 
 def euler_from_matrix(matrix):
     """converts a matrix to Eulers - as in Relion euler.cpp"""
@@ -68,7 +66,6 @@ def euler_from_vector(vector):
     psi = 0
 
     return rot, tilt, psi
-
 
 def euler_print(rot, tilt, psi):
     """prints three angles in degrees"""
