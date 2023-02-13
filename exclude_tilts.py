@@ -76,38 +76,30 @@ def main(inputPrefix, outputPrefix, excludeFile):
     with open(excludeFile, 'r') as tiltListFile:
         rangeList =  tiltListFile.read()
 
+    if len(rangeList) = 0:
+        print("No tilts listed to be excluded...")
+        exit()
+
     tiltList = extractMembersOfRangeList(rangeList)
 
     if os.path.exists(inputPrefix + ".mrc"):
-        print("Excluding tilts from %s..." % (inputPrefix+".mrc"))
+        print("Excluding tilts %s from %s..." % (rangeList, inputPrefix+".mrc"))
         runNewstackToExclude(inputPrefix+".mrc", outputPrefix+".mrc", tiltList)
     else:
-        print("%s does not found!!" % (inputPrefix+".rawtlt"))
+        print("%s not found!!" % (inputPrefix+".rawtlt"))
         exit()
 
     if os.path.exists(inputPrefix+".rawtlt"):
         print("Excluding tilts from %s..." % (inputPrefix + ".rawtlt"))
         excludeFromTiltListFile(inputPrefix+".rawtlt", outputPrefix+".rawtlt", tiltList)
     else:
-        print("%s does not found skipping processing of it..." % (inputPrefix+".rawtlt"))
-
-    if os.path.exists(inputPrefix + ".tltdose"):
-        print("Excluding tilts from %s..." % (inputPrefix + ".tltdose"))
-        excludeFromTiltListFile(inputPrefix + ".tltdose", outputPrefix + ".tltdose", tiltList)
-    else:
-        print("%s does not found skipping processing of it..." % (inputPrefix+".tltdose"))
-
-    if os.path.exists(inputPrefix + ".tltorder"):
-        print("Excluding tilts from %s..." % (inputPrefix + ".tltorder"))
-        excludeFromTiltListFile(inputPrefix + ".tltorder", outputPrefix + ".tltorder", tiltList)
-    else:
-        print("%s does not found skipping processing of it..." % (inputPrefix+".tltorder"))
+        print("%s not found skipping processing of it..." % (inputPrefix+".rawtlt"))
 
     if os.path.exists(inputPrefix + ".mdoc"):
         print("Excluding tilts from %s..." % (inputPrefix + ".mdoc"))
         excludeFromMdocFile(inputPrefix + ".mdoc", outputPrefix + ".mdoc", tiltList)
     else:
-        print("%s does not found skipping processing of it..." % (inputPrefix+".mdoc"))
+        print("%s not found skipping processing of it..." % (inputPrefix+".mdoc"))
 
     print("All done! Have fun!")
 
@@ -119,7 +111,7 @@ if __name__ == "__main__":
     add('--i', help="Input prefix mrc-stack.")
     add('--o', help="Output prefix.")
     add('--exclude_file', type=str, default="",
-        help="Textfile with comma separated list of excluded views (or range of view as in newstack).")
+        help="Textfile with comma separated list of excluded views (or range of views as in newstack).")
 
     args = parser.parse_args()
 
