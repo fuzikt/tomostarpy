@@ -76,7 +76,7 @@ def main(inputPrefix, outputPrefix, excludeFile):
     with open(excludeFile, 'r') as tiltListFile:
         rangeList =  tiltListFile.read()
 
-    if len(rangeList) = 0:
+    if len(rangeList) == 0:
         print("No tilts listed to be excluded...")
         exit()
 
