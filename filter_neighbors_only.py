@@ -16,9 +16,9 @@ class sortByParticleDistance:
         add('--i', help="Input STAR file name with particles.")
         add('--o', help="Output STAR file name.")
         add('--dist', type=str, default="1.00",
-            help="Distance in agstroms that consider particles as neighbors. (Default 1.0)")
+            help="Distance in Angstroms that consider particles as neighbors. (Default 1.0)")
         add('--min_neigh', type=str, default="1",
-            help="Minimum number of neighbors at --dist particle has to be kept in seection! (Default 1)")
+            help="Minimum number of neighbors at --dist particle has to be kept in selection! (Default 1)")
         add('--min_corr', type=str, default="0",
             help="Minimum cross-correlation value of the neighbour to be considered as a true neighbour! (Default 0)")
 
@@ -53,14 +53,15 @@ class sortByParticleDistance:
         while repeat:
             for particle in particles:
                 for compParticle in particles:
-                    if (math.sqrt((particle.rlnCoordinateX * apix - particle.rlnOriginXAngst - compParticle.rlnCoordinateX * apix + compParticle.rlnOriginXAngst) ** 2 + (
-                            particle.rlnCoordinateY * apix - particle.rlnOriginYAngst - compParticle.rlnCoordinateY * apix + compParticle.rlnOriginYAngst) ** 2 + (
-                            particle.rlnCoordinateZ * apix - particle.rlnOriginZAngst - compParticle.rlnCoordinateZ * apix + compParticle.rlnOriginZAngst) ** 2) <= maxDist) and compParticle.rlnCtfFigureOfMerit >= minXcorr:
-                        counter += 1
-                        if counter == minNeighNr:
-                            counter = 0
-                            newParticles.append(particle)
-                            break
+                    if compParticle != particle:
+                        if (math.sqrt((particle.rlnCoordinateX * apix - particle.rlnOriginXAngst - compParticle.rlnCoordinateX * apix + compParticle.rlnOriginXAngst) ** 2 + (
+                                particle.rlnCoordinateY * apix - particle.rlnOriginYAngst - compParticle.rlnCoordinateY * apix + compParticle.rlnOriginYAngst) ** 2 + (
+                                particle.rlnCoordinateZ * apix - particle.rlnOriginZAngst - compParticle.rlnCoordinateZ * apix + compParticle.rlnOriginZAngst) ** 2) <= maxDist) and compParticle.rlnCtfFigureOfMerit >= minXcorr:
+                            counter += 1
+                            if counter == minNeighNr:
+                                counter = 0
+                                newParticles.append(particle)
+                                break
             if len(newParticles) < len(particles):
                 repeat = True
                 particles = deepcopy(newParticles)
