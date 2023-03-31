@@ -8,7 +8,7 @@ from lib.chimcmm import cmmData
 from lib.chimbild import bildArrowData
 
 
-class placebackPDB:
+class placebackArrow:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
             description="Performs placeback of oriented arrows according to the coordinates and euler angles defined in a star file.",
@@ -114,4 +114,4 @@ class placebackPDB:
 
 
 if __name__ == "__main__":
-    placebackPDB().main()
+    placebackArrow().main()
