@@ -1,0 +1,3 @@
+# tomostarpy requirements
+numpy
+cython

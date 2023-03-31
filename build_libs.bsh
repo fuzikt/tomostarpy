@@ -1,4 +1,5 @@
 #!/bin/bash
 # run this script to build cython libs
+# no need to run after INSTALL.sh
 cd lib
 python3 setup.py build_ext --inplace
