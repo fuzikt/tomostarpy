@@ -15,7 +15,7 @@ class cmmItem:
 
 class cmmData:
 
-    def __init__(self, setName):
+    def __init__(self, setName=None):
         if setName == None:
             self.setName = "marker set 1"
         else:
