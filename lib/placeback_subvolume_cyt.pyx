@@ -329,6 +329,11 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
                 coloringValue = 0
 
             if outputCmm:
+                # to keep the cmm selection possibility wee need in any case the original coords from the star
+                origCoordX = particle.rlnCoordinateX
+                origCoordY = particle.rlnCoordinateY
+                origCoordZ = particle.rlnCoordinateZ
+
                 if recenter:
                     particle.rlnCoordinateX -= particle.rlnOriginXAngst / apix
                     particle.rlnCoordinateY -= particle.rlnOriginYAngst / apix
@@ -349,8 +354,8 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
 
                 outCmmItems.addItem(particle.rlnCoordinateX * apix, particle.rlnCoordinateY * apix,
                                     particle.rlnCoordinateZ * apix,
-                                    coloringValue, particle.rlnCoordinateX, particle.rlnCoordinateY,
-                                    particle.rlnCoordinateZ,
+                                    coloringValue, origCoordX, origCoordY,
+                                    origCoordZ,
                                     inputMapMaxX * inputApix / 6)
 
             pixPos = 0
