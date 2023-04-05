@@ -3,7 +3,8 @@ import numpy as np
 import struct
 import argparse
 import sys
-
+import os
+from lib.newstlist import *
 
 def readMrcSizeApix(mrcFileName):
     with open(mrcFileName, "rb") as mrcFile:
@@ -31,28 +32,6 @@ def readMrcData(mrcFileName):
                               offset=1024 - 12)
     return mrcData
 
-def rangeListCreate(excludeList):
-    rangeList = ""
-    rangeStart = False
-    for itemNr in range(len(excludeList)):
-        if itemNr == 0:
-            rangeList += str(excludeList[itemNr])
-            continue
-        if excludeList[itemNr] - 1 == excludeList[itemNr - 1]:
-            rangeStart = True
-        else:
-            if rangeStart:
-                rangeStart = False
-                rangeList += "-" + str(excludeList[itemNr - 1]) + "," + str(excludeList[itemNr])
-            else:
-                rangeList += "," + str(excludeList[itemNr])
-
-    if rangeStart:
-        rangeList += "-" + str(excludeList[itemNr])
-
-    return rangeList
-
-
 def main(tiltSeriesMrcFile, outputTxtFile, thresholdValue):
     tiltSeriesFile = tiltSeriesMrcFile
     avgThreshold = thresholdValue
@@ -67,7 +46,14 @@ def main(tiltSeriesMrcFile, outputTxtFile, thresholdValue):
     sliceAverages = np.mean(tiltSeriesData.reshape(-1, imageSizeXY), axis=1)
 
     tiltCounter = 1
-    excludeTilts = []
+
+    if os.path.exists(outputFile):
+        print("Previous %s file found. The excluded tilts present in it will be extended by the new ones...." % outputFile)
+        with open(outputFile, 'r') as tiltListFile:
+            rangeList = tiltListFile.read()
+        excludeTilts =  extractMembersOfRangeList(rangeList)
+    else:
+        excludeTilts = []
 
     for sliceAvg in sliceAverages:
         if sliceAvg <= avgThreshold:
@@ -78,6 +64,7 @@ def main(tiltSeriesMrcFile, outputTxtFile, thresholdValue):
         outTiltListFile.write("%s\n" % rangeListCreate(excludeTilts))
 
     print("Tilts with average under the threshold: %s" % rangeListCreate(excludeTilts))
+    print("%s written..." % outputFile)
     print("All done! Have fun!")
 
 
