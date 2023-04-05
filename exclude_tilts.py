@@ -3,11 +3,11 @@ import os
 import subprocess
 import sys
 import argparse
+from lib.newstlist import *
 
 def runNewstackToExclude(inputFile, outputFile, excludeList):
     newstackcmd = "newstack"
     newStackCommand = [newstackcmd, "-in", inputFile, "-ou", outputFile, "-exc", ",".join([str(i) for i in excludeList]), "-fr"]
-    #if self.versbosity > 1: print("Running: %s" % " ".join(newStackCommand))
     newstackProcess = subprocess.run(newStackCommand, stdout=subprocess.DEVNULL)
     if newstackProcess.returncode != 0:
         print("Something bad happened during running the newstack command.")
@@ -61,22 +61,11 @@ def excludeFromMdocFile(inputFile, outputFile, excludeList):
                 outMdocFile.write("%s" % zValueBlockLine)
 
 
-def extractMembersOfRangeList(rangeList):
-    listItems = []
-    for item in rangeList.split(","):
-        if "-" in item:
-            start = int(item.split("-")[0])
-            stop = int(item.split("-")[1])+1
-            listItems.extend(range(start,stop))
-        else:
-            listItems.append(int(item))
-    return listItems
-
 def main(inputPrefix, outputPrefix, excludeFile):
     with open(excludeFile, 'r') as tiltListFile:
         rangeList =  tiltListFile.read()
 
-    if len(rangeList) == 0:
+    if len(rangeList.strip()) == 0:
         print("No tilts listed to be excluded...")
         exit()
 
@@ -106,7 +95,7 @@ def main(inputPrefix, outputPrefix, excludeFile):
 if __name__ == "__main__":
     # if called directly from command line
     parser = argparse.ArgumentParser(
-        description="Removes tilts defined in --exclude_file from tilt series mrc-stack and corresponding *.rawtlt, *.tltdose, *.tltorder, *.mdoc. ")
+        description="Removes tilts defined in --exclude_file from tilt series mrc-stack and corresponding *.rawtlt, *.mdoc.")
     add = parser.add_argument
     add('--i', help="Input prefix mrc-stack.")
     add('--o', help="Output prefix.")
