@@ -32,6 +32,17 @@ pip install -r lib/requirements.txt
 echo ">>Compiling the required libraries..."
 ./build_libs.bsh
 
+if [[ ! -d /usr/local/cuda ]]; then
+   echo ""
+   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+   echo "CUDA toolkit not found at default /usr/local/cuda. Please specify the path manually:"
+   read cudaPath
+else
+   cudaPath="/usr/local/cuda"
+fi
+
+echo "export CUDA_PATH=$cudaPath" >> venv/bin/activate
+
 echo "---------------------------------------------------------------"
 echo "!!! Before using the tomostarpy scripts don't forget to source:"
 echo "source <tomostarpydir>/venv/bin/activate"
