@@ -233,7 +233,10 @@ class MergeTiltsFlow:
 
                 lastAmountOfFiles, perPointTiltSeries = self.processFilesInList(tilt_files)
 
-            time.sleep(self.watch_interval)
+            if self.watch_interval > 0:
+                time.sleep(self.watch_interval)
+            else:
+                killer.kill_now = True
 
         # write the last set of tilt-series whe SIGTERM received
         if self.versbosity > 0 : print("\nSIGTERM received. Writing the last tilt-series...")
@@ -267,7 +270,7 @@ if __name__ == "__main__":
     add('--path', type=str, default="",
         help="Path to be included in env PATH for IMOD! (Default: empty)")
     add('--watch_int', type=int, default="1",
-        help="Time interval in seconds for the watchdog. (Default: 1)")
+        help="Time interval in seconds for the watchdog. If set to -1 the watchdog is deactivated and runs a single-batch. (Default: 1)")
     add('--verb', type=int, default="1",
         help="Verbosity level (0,1,2). (Default: 1)")
 
