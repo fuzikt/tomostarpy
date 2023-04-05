@@ -1,3 +1,4 @@
 # tomostarpy requirements
 numpy
 cython
+cuda-python

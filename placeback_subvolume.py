@@ -3,6 +3,7 @@ import os
 import sys
 import argparse
 from lib.placeback_subvolume_cyt import *
+from lib.placeback_subvolume_cuda import *
 from argparse import RawTextHelpFormatter
 
 
@@ -39,6 +40,8 @@ class placebackSubvolume:
             help="Tomo X axis tilt in degrees. (Default: 0)")
         add('--ytilt', type=str, default="0.00",
             help="Tomo Y axis tilt in degrees. (Default: 0)")
+        add('--gpu', dest='gpu', action='store_true', default=False,
+            help="Use GPU acceleration.")
 
     def usage(self):
         self.parser.print_help()
@@ -99,9 +102,16 @@ class placebackSubvolume:
         Xtilt = float(args.xtilt)
         Ytilt = float(args.ytilt)
 
-        placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
-                        placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
-                        Xtilt, Ytilt)
+        if args.gpu:
+            placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName,
+                            binning,
+                            placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold,
+                            colorMapExtend,
+                            Xtilt, Ytilt)
+        else:
+            placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
+                            placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
+                            Xtilt, Ytilt)
 
 
 if __name__ == "__main__":
