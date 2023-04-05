@@ -21,6 +21,8 @@ class sortByParticleDistance:
             help="Minimum number of neighbors at --dist particle has to be kept in selection! (Default 1)")
         add('--min_corr', type=str, default="0",
             help="Minimum cross-correlation value of the neighbour to be considered as a true neighbour! (Default 0)")
+        add('--max_tilt_diff', type=float, default="360",
+            help="Maximum amount of tilt angle difference in degrees between neighbors to be considered as a true neighbour! (Default 360)")
 
     def usage(self):
         self.parser.print_help()
@@ -45,7 +47,7 @@ class sortByParticleDistance:
             particles.append(particle)
         return particles
 
-    def sortParticleByDistance(self, particles, apix, minNeighNr, maxDist, minXcorr):
+    def sortParticleByDistance(self, particles, apix, minNeighNr, maxDist, minXcorr, max_tilt_diff):
         newParticles = []
         counter = 0
         repeat = True
@@ -56,7 +58,8 @@ class sortByParticleDistance:
                     if compParticle != particle:
                         if (math.sqrt((particle.rlnCoordinateX * apix - particle.rlnOriginXAngst - compParticle.rlnCoordinateX * apix + compParticle.rlnOriginXAngst) ** 2 + (
                                 particle.rlnCoordinateY * apix - particle.rlnOriginYAngst - compParticle.rlnCoordinateY * apix + compParticle.rlnOriginYAngst) ** 2 + (
-                                particle.rlnCoordinateZ * apix - particle.rlnOriginZAngst - compParticle.rlnCoordinateZ * apix + compParticle.rlnOriginZAngst) ** 2) <= maxDist) and compParticle.rlnCtfFigureOfMerit >= minXcorr:
+                                particle.rlnCoordinateZ * apix - particle.rlnOriginZAngst - compParticle.rlnCoordinateZ * apix + compParticle.rlnOriginZAngst) ** 2) <= maxDist)\
+                                and compParticle.rlnCtfFigureOfMerit >= minXcorr and (abs(particle.rlnAngleTilt-compParticle.rlnAngleTilt)<=max_tilt_diff):
                             counter += 1
                             if counter == minNeighNr:
                                 counter = 0
@@ -94,7 +97,7 @@ class sortByParticleDistance:
         # get unbinned apix from star file
         apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
 
-        new_particles.extend(self.sortParticleByDistance(particles, apix, int(args.min_neigh), float(args.dist), float(args.min_corr)))
+        new_particles.extend(self.sortParticleByDistance(particles, apix, int(args.min_neigh), float(args.dist), float(args.min_corr), args.max_tilt_diff))
 
         if md.version == "3.1":
             mdOut = md.clone()
