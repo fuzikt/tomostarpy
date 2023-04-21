@@ -8,7 +8,7 @@ import struct
 import sys
 import time
 import ctypes
-from cuda_common import cuda
+from cuda import cuda
 from lib.cuda_common import common
 from lib.cuda_common.helper_cuda import checkCudaErrors, findCudaDeviceDRV
 
