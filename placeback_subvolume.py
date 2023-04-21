@@ -32,6 +32,8 @@ class placebackSubvolume:
             help="Label from the star file that will be used for rainbow coloring of the cmm markers.")
         add('--color_map', dest='color_map', action='store_true', default=False,
             help="Create map with coloring values stored as pixel value.")
+        add('--radial_color', dest='radial_color', action='store_true', default=False,
+            help="Create map with coloring values storing the value of radial distance form the center of the box. Useful for radial coloring.")
         add('--color_map_threshold', type=str, default="0.01",
             help="Threshold value at which the contour of the --isub in the output color map should contain values")
         add('--color_map_extend', type=str, default="2",
@@ -99,19 +101,20 @@ class placebackSubvolume:
 
         colorMapExtend = int(float(args.color_map_extend))
 
+        radial_color = args.radial_color
+
         Xtilt = float(args.xtilt)
         Ytilt = float(args.ytilt)
 
         if args.gpu:
             placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName,
                             binning,
-                            placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold,
-                            colorMapExtend,
+                            placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
                             Xtilt, Ytilt)
         else:
             placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
                             placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
-                            Xtilt, Ytilt)
+                            radial_color, Xtilt, Ytilt)
 
 
 if __name__ == "__main__":

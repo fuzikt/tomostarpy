@@ -3,7 +3,7 @@ import numpy as np
 cimport numpy as np
 cimport cython
 from cython.parallel import prange
-from libc.math cimport sin, cos, M_PI, round
+from libc.math cimport sin, cos, M_PI, round, sqrt
 from lib.euler import euler_from_matrix
 import lib.matrix3 as matrix3
 from lib.chimcmm import cmmData
@@ -172,7 +172,7 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
 def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, tomoName,
                     binning,
                     bint placePartialVolumes, recenter, coloringLabel, bint outputColorMap, float colorMapTreshold,
-                    int colorMapExtend, Xtilt, Ytilt):
+                    int colorMapExtend, bint radial_color, Xtilt, Ytilt):
     #read in star file
     md = MetaData(inputStarFile)
     particles = []
@@ -381,6 +381,8 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
                                 for y_extend in range(newY - colorMapExtend, newY + colorMapExtend, 1):
                                     for z_extend in range(newZ - colorMapExtend, newZ + colorMapExtend, 1):
                                         if z_extend < mapMaxZ and y_extend < mapMaxY and x_extend < mapMaxX and z_extend >= 0 and y_extend >= 0 and x_extend >= 0:
+                                            if radial_color:
+                                                coloringValue = sqrt((x_extend-xpos)**2 + (y_extend-ypos)**2 + (z_extend-zpos)**2)*inputApix
                                             outputColorMapArray[
                                                 x_extend + y_extend * mapMaxX + z_extend * mapMaxX * mapMaxY] = coloringValue
 
