@@ -110,7 +110,7 @@ class placebackSubvolume:
             placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName,
                             binning,
                             placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
-                            Xtilt, Ytilt)
+                            radial_color, Xtilt, Ytilt)
         else:
             placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
                             placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,

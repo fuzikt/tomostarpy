@@ -96,7 +96,7 @@ extern "C"{
 __global__ void placeVolume(float *rotatedMap, float *outputMapArray, float *outputColorMapArray,
                             int rotatedMapMaxX, int rotatedMapMaxY, int rotatedMapMaxZ,
                             float shiftX, float shiftY, float shiftZ, int mapMaxX, int mapMaxY, int mapMaxZ,
-                            bool outputColorMap, float colorMapTreshold, int colorMapExtend, float coloringValue )
+                            bool outputColorMap, float colorMapTreshold, int colorMapExtend, float coloringValue, bool radial_color, float inputApix)
 {
 
     size_t pixPos = blockIdx.x * blockDim.x + threadIdx.x;
@@ -131,6 +131,8 @@ __global__ void placeVolume(float *rotatedMap, float *outputMapArray, float *out
                             if ((z_extend < mapMaxZ) && (y_extend < mapMaxY) && (x_extend < mapMaxX) &&
                                 (z_extend >= 0) &&
                                 (y_extend >= 0) && (x_extend >= 0)) {
+                                if (radial_color) {
+                                   coloringValue = sqrt((x_extend-shiftX)*(x_extend-shiftX) + (y_extend-shiftY)*(y_extend-shiftY) + (z_extend-shiftZ)*(z_extend-shiftZ))*inputApix; }
                                 outputColorMapArray[x_extend + y_extend * mapMaxX +
                                                     z_extend * mapMaxX * mapMaxY] = coloringValue;
                             }
@@ -196,7 +198,7 @@ def matrix_from_euler(rot, tilt, psi):
 
 def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName,
                     binning, placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold,
-                    colorMapExtend, Xtilt, Ytilt):
+                    colorMapExtend, radial_color, Xtilt, Ytilt):
 
     total_start = time.perf_counter()
 
@@ -396,8 +398,8 @@ def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, out
 
             # place volume CUDA kernel
             kernelArgs = (
-            (d_rotatedMap, d_outputMapArray, d_outputColorMapArray, inputMapMaxX, inputMapMaxY, inputMapMaxZ, xpos, ypos, zpos, mapMaxX, mapMaxY, mapMaxZ, outputColorMap, colorMapTreshold, colorMapExtend, coloringValue),
-            (None, None, None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_float, ctypes.c_int, ctypes.c_float))
+            (d_rotatedMap, d_outputMapArray, d_outputColorMapArray, inputMapMaxX, inputMapMaxY, inputMapMaxZ, xpos, ypos, zpos, mapMaxX, mapMaxY, mapMaxZ, outputColorMap, colorMapTreshold, colorMapExtend, coloringValue, radial_color, inputApix),
+            (None, None, None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_float, ctypes.c_int, ctypes.c_float, ctypes.c_bool, ctypes.c_float,))
 
             checkCudaErrors(cuda.cuLaunchKernel(_placeVolume_kernel,
                                                 NUM_BLOCKS, 1, 1,
