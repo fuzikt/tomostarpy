@@ -11,7 +11,7 @@ from lib.chimbild import bildArrowData
 class placebackArrow:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Performs placeback of oriented arrows according to the coordinates and euler angles defined in a star file.",
+            description="Performs placeback of oriented arrows (*.bild format) according to the coordinates and euler angles defined in a star file.",
             formatter_class=RawTextHelpFormatter)
         add = self.parser.add_argument
         add('--i', help="Input star file file.")
@@ -22,7 +22,7 @@ class placebackArrow:
         add('--cmm', dest='cmm', action='store_true', default=False,
             help="Generate cmm file as well.")
         add('--color_lb', type=str, default="",
-            help="Label from the star file that will be used for rainbow coloring of the arrows and cmm markers. (default: empty")
+            help="Label from the star file that will be used for rainbow coloring of the arrows and cmm markers. (default: empty)")
         add('--invert', dest='invert', action='store_true', default=False,
             help="Invert the pointing direction of the arrow.")
         add('--tomo_name', type=str, default="",
