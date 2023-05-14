@@ -10,8 +10,11 @@ import argparse
 import sys
 from lib.metadata import *
 
+
 class CtfFitTiltSeriesCtFind4:
-    def __init__(self, tiltsFile, tltFile, outDir, defocus_window = 10000, apix = 1, voltage = 300, cs_val = 2.7, amp_cont = 0.07, spectr_size = 512, min_res = 30, max_res = 8, min_defoc = 5000, max_defoc = 75000, step_defoc = 100, threads = 10, tmpDir = "ctffind_tmp", ctffind_cmd = "ctffind", gctf = False, gpu = 0, gctf_cmd = "gctf", path='', verbosity = 0):
+    def __init__(self, tiltsFile, tltFile, outDir, defocus_window=10000, apix=1, voltage=300, cs_val=2.7, amp_cont=0.07,
+                 spectr_size=512, min_res=30, max_res=8, min_defoc=5000, max_defoc=75000, step_defoc=100, threads=10,
+                 tmpDir="ctffind_tmp", ctffind_cmd="ctffind", gctf=False, gpu=0, gctf_cmd="gctf", path='', verbosity=0):
         self.tiltsFile = tiltsFile
         self.outDir = outDir
         self.tltFile = tltFile
@@ -56,7 +59,6 @@ class CtfFitTiltSeriesCtFind4:
             originZ = float(struct.unpack('f', mrcFile.read(4))[0])
         return imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ
 
-
     def readMrcData(self, mrcFileName):
         with open(mrcFileName, "rb") as mrcFile:
             imageSizeX = int(struct.unpack('i', mrcFile.read(4))[0])
@@ -65,7 +67,6 @@ class CtfFitTiltSeriesCtFind4:
             mrcData = np.fromfile(mrcFile, dtype=np.dtype(np.float32), count=(imageSizeX * imageSizeY * imageSizeZ),
                                   offset=1024 - 12)
         return mrcData
-
 
     def writeMrcFile(self, mrcData, stencilFile, zDim, outFile):
         with open(stencilFile, "rb") as mrcStencilFile:
@@ -78,15 +79,15 @@ class CtfFitTiltSeriesCtFind4:
             mrcFile.seek(1024, 0)
             mrcData.astype('float32').tofile(mrcFile)
 
-
-    def runCtfFind4(self, inputFile, outputPreffix, apix, voltage, cs_val, amp_cont, spectr_size, min_res, max_res, min_defoc,
+    def runCtfFind4(self, inputFile, outputPreffix, apix, voltage, cs_val, amp_cont, spectr_size, min_res, max_res,
+                    min_defoc,
                     max_defoc, step_defoc, threads):
         if self.versbosity > 0:
             STDOUT = None
         else:
             STDOUT = subprocess.DEVNULL
 
-        p = subprocess.Popen(self.ctffindcmd+" <<EOF\n" + inputFile + "\n"
+        p = subprocess.Popen(self.ctffindcmd + " <<EOF\n" + inputFile + "\n"
                              + outputPreffix + "\n"
                              + str(apix) + "\n"
                              + str(voltage) + "\n"
@@ -133,7 +134,6 @@ class CtfFitTiltSeriesCtFind4:
                              + " " + inputFile, shell=True, stdout=STDOUT, stderr=subprocess.STDOUT)
         p.wait()
 
-
     def runCtfFindOnSeriesOfTilts(self, previousTiltAngleDefocus, tiltValues, rangeOfTilts):
         for tiltIndex in rangeOfTilts:
             min_defoc_restr = max(0, previousTiltAngleDefocus - self.defocus_window)
@@ -150,9 +150,9 @@ class CtfFitTiltSeriesCtFind4:
                 ctfFind4Result = self.getCtfFind4Results("%s/tilt_%s_ctf.txt" % (self.tmpDir, tiltIndex))
             else:
                 self.runGctf("%s/tilt_%s.mrc" % (self.tmpDir, tiltIndex),
-                                "%s/tilt_%s_ctf.star" % (self.tmpDir, tiltIndex), self.apix, self.voltage, self.cs_val,
-                                 self.amp_cont, self.spectr_size,
-                                 self.min_res, max_res_weighted, min_defoc_restr, max_defoc_restr, self.step_defoc)
+                             "%s/tilt_%s_ctf.star" % (self.tmpDir, tiltIndex), self.apix, self.voltage, self.cs_val,
+                             self.amp_cont, self.spectr_size,
+                             self.min_res, max_res_weighted, min_defoc_restr, max_defoc_restr, self.step_defoc)
                 ctfFind4Result = self.getGctfResults(
                     "%s/tilt_%s_ctf.star" % (self.tmpDir, tiltIndex))
                 shutil.move("%s/tilt_%s.ctf" % (self.tmpDir, tiltIndex),
@@ -174,14 +174,12 @@ class CtfFitTiltSeriesCtFind4:
                 minTiltAngle = tiltAngle
         return tiltAngles.index(minTiltAngle)
 
-
     def readTiltFile(self, tltFile):
         tiltValues = []
         with open(tltFile, 'r') as tiltValuesFile:
             for tiltValue in tiltValuesFile.readlines():
                 tiltValues.append(float(tiltValue))
         return tiltValues
-
 
     def getCtfFind4Results(self, diagnosticTxtFile):
         with open(diagnosticTxtFile, 'r') as diagnosticFile:
@@ -191,14 +189,14 @@ class CtfFitTiltSeriesCtFind4:
 
     def getGctfResults(self, diagnosticStarFile):
         mdDefocusData = MetaData(diagnosticStarFile)
-        return [1.0, mdDefocusData.data_[0].rlnDefocusU, mdDefocusData.data_[0].rlnDefocusV, mdDefocusData.data_[0].rlnDefocusAngle, 0.0, mdDefocusData.data_[0].rlnCtfFigureOfMerit, mdDefocusData.data_[0].rlnFinalResolution]
-
+        return [1.0, mdDefocusData.data_[0].rlnDefocusU, mdDefocusData.data_[0].rlnDefocusV,
+                mdDefocusData.data_[0].rlnDefocusAngle, 0.0, mdDefocusData.data_[0].rlnCtfFigureOfMerit,
+                mdDefocusData.data_[0].rlnFinalResolution]
 
     def writeCtfFind4ResultsSumary(self, ctfFind4Results, outputFile):
         with open(outputFile, 'w') as ctfFind4outFile:
             for ctfFind4Result in ctfFind4Results:
                 ctfFind4outFile.write("%0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n" % tuple(ctfFind4Result))
-
 
     def combineCtfMrcOutput(self, nrOfTilts, tmpDir, outFile):
         combinedData = self.readMrcData("%s/tilt_%s_ctf.mrc" % (tmpDir, 0))
@@ -224,7 +222,7 @@ class CtfFitTiltSeriesCtFind4:
 
         perTiltMrcData = nonSplitMrcData.reshape(-1, imageSizeXY)
 
-        print("Preparing data %s for CtfFind4 fit...." % self.tiltsFile )
+        print("Preparing data %s for CtfFind4 fit...." % self.tiltsFile)
         for i in range(imageSizeZ):
             self.writeMrcFile(perTiltMrcData[i], self.tiltsFile, 1, "%s/tilt_%s.mrc" % (self.tmpDir, i))
 
@@ -237,18 +235,23 @@ class CtfFitTiltSeriesCtFind4:
 
         if not self.doGctf:
             self.runCtfFind4("%s/tilt_%s.mrc" % (self.tmpDir, smallestTiltAngleIndex),
-                        "%s/tilt_%s_ctf.mrc" % (self.tmpDir, smallestTiltAngleIndex), self.apix, self.voltage, self.cs_val, self.amp_cont, self.spectr_size,
-                        self.min_res, self.max_res, self.min_defoc, self.max_defoc, self.step_defoc, self.threads)
-            ctfFind4ResultSmalestAngle = self.getCtfFind4Results("%s/tilt_%s_ctf.txt" % (self.tmpDir, smallestTiltAngleIndex))
+                             "%s/tilt_%s_ctf.mrc" % (self.tmpDir, smallestTiltAngleIndex), self.apix, self.voltage,
+                             self.cs_val, self.amp_cont, self.spectr_size,
+                             self.min_res, self.max_res, self.min_defoc, self.max_defoc, self.step_defoc, self.threads)
+            ctfFind4ResultSmalestAngle = self.getCtfFind4Results(
+                "%s/tilt_%s_ctf.txt" % (self.tmpDir, smallestTiltAngleIndex))
 
         else:
             self.runGctf("%s/tilt_%s.mrc" % (self.tmpDir, smallestTiltAngleIndex),
-                        "%s/tilt_%s_ctf.star" % (self.tmpDir, smallestTiltAngleIndex), self.apix, self.voltage, self.cs_val, self.amp_cont, self.spectr_size,
-                        self.min_res, self.max_res, self.min_defoc, self.max_defoc, self.step_defoc)
-            ctfFind4ResultSmalestAngle = self.getGctfResults("%s/tilt_%s_ctf.star" % (self.tmpDir, smallestTiltAngleIndex))
-            shutil.move("%s/tilt_%s.ctf" % (self.tmpDir, smallestTiltAngleIndex), "%s/tilt_%s_ctf.mrc" % (self.tmpDir, smallestTiltAngleIndex))
+                         "%s/tilt_%s_ctf.star" % (self.tmpDir, smallestTiltAngleIndex), self.apix, self.voltage,
+                         self.cs_val, self.amp_cont, self.spectr_size,
+                         self.min_res, self.max_res, self.min_defoc, self.max_defoc, self.step_defoc)
+            ctfFind4ResultSmalestAngle = self.getGctfResults(
+                "%s/tilt_%s_ctf.star" % (self.tmpDir, smallestTiltAngleIndex))
+            shutil.move("%s/tilt_%s.ctf" % (self.tmpDir, smallestTiltAngleIndex),
+                        "%s/tilt_%s_ctf.mrc" % (self.tmpDir, smallestTiltAngleIndex))
 
-#        exit()
+        #        exit()
         # set correct tilt nr
         ctfFind4ResultSmalestAngle[0] = smallestTiltAngleIndex + 1
 
@@ -260,7 +263,8 @@ class CtfFitTiltSeriesCtFind4:
         self.ctfFind4Results.append(ctfFind4ResultSmalestAngle)
         previousTiltAngleDefocus = (ctfFind4ResultSmalestAngle[1] + ctfFind4ResultSmalestAngle[2]) / 2
 
-        self.runCtfFindOnSeriesOfTilts(previousTiltAngleDefocus, tiltValues, range(smallestTiltAngleIndex + 1, len(tiltValues)))
+        self.runCtfFindOnSeriesOfTilts(previousTiltAngleDefocus, tiltValues,
+                                       range(smallestTiltAngleIndex + 1, len(tiltValues)))
 
         self.writeCtfFind4ResultsSumary(self.ctfFind4Results, self.outDir + "/" + self.outFilePreffix + "_ctf.txt")
         self.combineCtfMrcOutput(len(tiltValues), self.tmpDir, self.outDir + "/" + self.outFilePreffix + "_ctf.mrc")
@@ -271,19 +275,20 @@ class CtfFitTiltSeriesCtFind4:
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
-        print("%s written...." % (self.outFilePreffix + "_ctf.txt") )
+        print("%s written...." % (self.outFilePreffix + "_ctf.txt"))
         print("%s written...." % (self.outFilePreffix + "_ctf.mrc"))
         print("===>Total run time: %0.2f sec" % ((time.perf_counter() - total_start)))
         print("All done. Have fun!")
 
+
 if __name__ == "__main__":
     # if called directly from command line
     parser = argparse.ArgumentParser(
-        description="Performs merging of separate tilt files from PACE-tomo or dose symmetric SerialEM script into tilt-series files.")
+        description="Performs constrained CTF fit on separate tilts using Ctffind4 or Gctf. First the middle tilt ctf is estimated then the following tilts in each direction are constrained by the --defocus_window of the previous tilt. The max resolution of the fitting is limited by 1/cos(tilt_angle) to avoid overfitting.")
     add = parser.add_argument
     add('--i', help="Input tilt-series MRC file.")
     add('--o', help="Output directory of results.")
-    add('--tlt', help="*.tlt or *.rawtlt file of the tilt series" )
+    add('--tlt', help="*.tlt or *.rawtlt file of the tilt series")
     add('--defocus_window', type=int, default=10000,
         help="Defocus window in Angstroms used for the restrained ctf search of the subsequent tilts. (Default: 10 000)")
     add('--apix', type=float, default=1.0,
@@ -307,7 +312,7 @@ if __name__ == "__main__":
     add('--step_defoc', type=float, default=100.0,
         help="Defocus step in Angstroms used for CTF fitting. (Default: 100.0)")
     add('--threads', type=int, default=10,
-        help="Number of parallel threads used for calculation. (Default: 10)")
+        help="Number of parallel threads used for calculation by Ctffind4. (Default: 10)")
     add('--gctf', dest='gctf', action='store_true', default=False,
         help="Use gCTF instead of CtfFind4.")
     add('--gpu', type=int, default=0,
@@ -319,7 +324,7 @@ if __name__ == "__main__":
     add('--gctf_cmd', type=str, default="gctf",
         help="Name of the gCTF command. (Default: gctf)")
     add('--path', type=str, default="",
-        help="Path to be included in env PATH for Ctffind4. (Default: empty)")
+        help="Path to be included in env PATH for Ctffind4 or Gctf. (Default: empty)")
 
     add('--verb', type=int, default="0",
         help="Verbosity level (0,1). (Default: 0)")
@@ -330,6 +335,12 @@ if __name__ == "__main__":
         parser.print_help()
         exit()
 
-    ctfFitTilts = CtfFitTiltSeriesCtFind4(args.i, args.tlt, args.o, defocus_window=args.defocus_window, apix=args.apix, voltage=args.voltage, cs_val=args.cs_val, amp_cont=args.amp_cont, spectr_size=args.spectr_size, min_res=args.min_res, max_res=args.max_res, min_defoc=args.min_defoc, max_defoc=args.max_defoc, step_defoc=args.step_defoc, threads=args.threads, tmpDir=args.tmpDir, ctffind_cmd=args.ctffind_cmd, gctf=args.gctf, gpu=args.gpu, gctf_cmd=args.gctf_cmd, path=args.path, verbosity=args.verb)
+    ctfFitTilts = CtfFitTiltSeriesCtFind4(args.i, args.tlt, args.o, defocus_window=args.defocus_window, apix=args.apix,
+                                          voltage=args.voltage, cs_val=args.cs_val, amp_cont=args.amp_cont,
+                                          spectr_size=args.spectr_size, min_res=args.min_res, max_res=args.max_res,
+                                          min_defoc=args.min_defoc, max_defoc=args.max_defoc,
+                                          step_defoc=args.step_defoc, threads=args.threads, tmpDir=args.tmpDir,
+                                          ctffind_cmd=args.ctffind_cmd, gctf=args.gctf, gpu=args.gpu,
+                                          gctf_cmd=args.gctf_cmd, path=args.path, verbosity=args.verb)
 
     ctfFitTilts.main()
