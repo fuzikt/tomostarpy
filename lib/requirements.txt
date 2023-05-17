@@ -1,4 +1,9 @@
 # tomostarpy requirements
 numpy
 cython
+nvidia-cuda-nvrtc-cu12
 cuda-python
+scikit-image
+matplotlib
+napari
+pyqt5
