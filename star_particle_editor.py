@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import struct
+import sys
 import napari
 from napari.layers import Points
 from magicgui import magicgui
@@ -244,8 +245,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    #if args.i == "" or args.o == "" or len(sys.argv) == 1:
-    #    parser.print_help()
-    #    exit()
+    if args.i == "" or len(sys.argv) == 1:
+        parser.print_help()
+        exit()
+
     main(args.i, args.itomo, args.o, args.tomo_name, args.color_lb, args.bin, args.point_size)
     #main()
