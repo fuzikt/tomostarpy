@@ -3,7 +3,7 @@ import numpy as np
 import struct
 import sys
 import napari
-from napari.layers import Points
+from napari.layers import Points, Image
 from magicgui import magicgui
 import vispy.color
 from lib.metadata import MetaData
@@ -36,14 +36,6 @@ def readMrcData(mrcFileName):
     return mrcData
 
 def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, pointSize):
-
-#    inputMrcs = "tomo67_1_bin8_filtered.rec,tomo67_1_bin8_convmap.mrc"
-#    inputStars = "tomo67_clustered.star,tomo67_clustered_napari.star,tomo67_clustered_napari3.star"
-#    outputStarFile = "tomo67_clustered_napari.star"
-#    tomoName = "tomo67"
-#    coloringLb = "rlnCtfFigureOfMerit"
-#    binning = 0
-#    pointSize = 7
 
     if "," in inputMrcs:
         inputMrcs = inputMrcs.replace(","," ")
@@ -79,7 +71,6 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         for i in range(int(rangeColor / 2), 0, -1):  # from yellow -> green
             rainbowArray.append([i / (rangeColor / 2), 1, 0])
         gredYellowGreen = vispy.color.Colormap(rainbowArray)
-
 
     # calculate point coordinates from particles
     for inputStarFile in inputStarFiles:
@@ -211,20 +202,55 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
             pointLayer.edge_color = 'lime'
             pointLayer.refresh_colors()
 
+    class PointAddingSettingsClass():
+        def __init__(self):
+            snapEnabled = False
+            imageForSnapping = None
+            snapRadius = 1
+
+    pointAddingSettings = PointAddingSettingsClass()
+
+    @magicgui(snapEnabled = {'label': 'Enable new point snaping:'}, imageForSnapping = {'label': 'Image for peak search:'}, snapRadius = {'label': 'Radius for peak search [px]:'}, call_button=False)
+    def snapToMax(snapEnabled: bool, imageForSnapping: Image, snapRadius=1):
+        print(snapEnabled)
+        pointAddingSettings.snapEnabled = snapEnabled
+        pointAddingSettings.imageForSnapping = imageForSnapping
+        pointAddingSettings.snapRadius = snapRadius
+
+    def next_on_click(layer, event):
+        """Mouse click binding"""
+        if layer.mode == 'add':
+            snapToMax()
+
+    def setDataEvent(event):
+        layer = event.source
+        if layer.mode == 'add':
+            if pointAddingSettings.snapEnabled:
+                if pointAddingSettings.imageForSnapping != None:
+                    x = int(layer.data[-1][2])
+                    y = int(layer.data[-1][1])
+                    z = int(layer.data[-1][0])
+                    maxValue = 0.0
+                    for xi in range(x-pointAddingSettings.snapRadius, x+pointAddingSettings.snapRadius):
+                        for yi in range(y - pointAddingSettings.snapRadius, y + pointAddingSettings.snapRadius):
+                            for zi in range(z - pointAddingSettings.snapRadius, z + pointAddingSettings.snapRadius):
+                                if pointAddingSettings.imageForSnapping.data[zi, yi, xi] > maxValue:
+                                    maxValue = pointAddingSettings.imageForSnapping.data[z, yi, xi]
+                                    xf = xi
+                                    yf = yi
+                                    zf = zi
+                    layer.data[-1] = [zf, yf, xf]
+                    layer.refresh_colors()
+
+    for pointLayer in pointLayers:
+        pointLayer.mouse_drag_callbacks.append(next_on_click)
+        pointLayer.events.set_data.connect(setDataEvent)
+
     viewer.window.add_dock_widget(copyPointsBetweenLayers, name="Copy Points Between Layers")
     viewer.window.add_dock_widget(saveStarFile, name="Save Star File")
     viewer.window.add_dock_widget(imodStylePoints, name="Color IMOD style")
+    viewer.window.add_dock_widget(snapToMax, name="New point snapping")
     napari.run()
-
-
-#    if napari_view:
-#        def next_on_click(layer, event):
-#            """Mouse click binding to advance the label when a point is added"""
-#            if layer.mode == 'add':
-#                print(pointsLayer.features['particle_data'])
-
-#        green = vispy.color.Colormap([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-
 
 if __name__ == "__main__":
     # if called directly from command line
@@ -250,4 +276,3 @@ if __name__ == "__main__":
         exit()
 
     main(args.i, args.itomo, args.o, args.tomo_name, args.color_lb, args.bin, args.point_size)
-    #main()
