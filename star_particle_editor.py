@@ -207,6 +207,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
             snapEnabled = False
             imageForSnapping = None
             snapRadius = 1
+            refreshRecursionBreak = False
 
     pointAddingSettings = PointAddingSettingsClass()
 
@@ -221,6 +222,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         """Mouse click binding"""
         if layer.mode == 'add':
             snapToMax()
+            pointAddingSettings.refreshRecursionBreak = False
 
     def setDataEvent(event):
         layer = event.source
@@ -240,7 +242,10 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
                                     yf = yi
                                     zf = zi
                     layer.data[-1] = [zf, yf, xf]
-                    layer.refresh_colors()
+                    if not pointAddingSettings.refreshRecursionBreak:
+                        pointAddingSettings.refreshRecursionBreak = True
+                        layer.refresh()
+                    #layer.refresh_colors()
 
     for pointLayer in pointLayers:
         pointLayer.mouse_drag_callbacks.append(next_on_click)
@@ -250,6 +255,15 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
     viewer.window.add_dock_widget(saveStarFile, name="Save Star File")
     viewer.window.add_dock_widget(imodStylePoints, name="Color IMOD style")
     viewer.window.add_dock_widget(snapToMax, name="New point snapping")
+
+    # IMOD style PageUP/PageDown slice change
+    @viewer.bind_key('PageUp')
+    def hello_world(viewer):
+        viewer.dims.set_point(axis=0, value=viewer.dims.point[0] + 1)
+    @viewer.bind_key('PageDown')
+    def hello_world(viewer):
+        viewer.dims.set_point(axis=0, value=viewer.dims.point[0] - 1)
+
     napari.run()
 
 if __name__ == "__main__":
