@@ -9,6 +9,8 @@ import vispy.color
 from lib.metadata import MetaData
 from copy import deepcopy
 import argparse
+from lib.matrix3 import *
+from lib.euler import *
 
 def readMrcSizeApix(mrcFileName):
     with open(mrcFileName, "rb") as mrcFile:
@@ -35,7 +37,7 @@ def readMrcData(mrcFileName):
                               offset=1024 - 12)
     return mrcData
 
-def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, pointSize):
+def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, pointSize, angles_mrc):
 
     if "," in inputMrcs:
         inputMrcs = inputMrcs.replace(","," ")
@@ -49,6 +51,13 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
 
     viewer = napari.Viewer(title='Star particle editor')
 
+    if angles_mrc != "":
+        anglesMrcData = readMrcData(angles_mrc)
+        imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ = readMrcSizeApix(angles_mrc)
+        anglesMrcData = anglesMrcData.reshape((-1, imageSizeY, imageSizeX))
+
+        anglesList = readAngleListFile(angles_mrc.replace("_angles.mrc", "_angles.list"))
+
     for inputMrcFile in inputMrcFiles:
         mrcData = readMrcData(inputMrcFile)
         imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ = readMrcSizeApix(inputMrcFile)
@@ -56,7 +65,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         viewer.add_image(mrcData, name=inputMrcFile)
 
     # take the apix form the first mrc file (for binnig calculation)
-        imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ = readMrcSizeApix(inputMrcFiles[0])
+    imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ = readMrcSizeApix(inputMrcFiles[0])
 
     metaDatas = []
     pointLayers = []
@@ -137,9 +146,19 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
 
             newParticle = metaDatas[metadataID].data_particles[particleID]
             if pointLayers[pointLayerID].features['particleID'][pointCounter] == "NaN":
-                newParticle.rlnAngleRot = 0.0
-                newParticle.rlnAngleTilt = 0.0
-                newParticle.rlnAnglePsi = 0.0
+                if angles_mrc != "":
+                    newParticle.rlnAngleRot = 0.0
+                    newParticle.rlnAngleTilt = 0.0
+                    newParticle.rlnAnglePsi = 0.0
+                else:
+                    angleListIndex = int(anglesMrcData[int(point[2]),int(point[1]),int(point[0])])-1
+                    eulersZXZ = anglesList[angleListIndex]
+                    rotMatrix = matrix_from_euler_zxz(radians(eulersZXZ[0]), radians(eulersZXZ[1]), radians(eulersZXZ[2]))
+                    rot, tilt, psi = euler_from_matrix(rotMatrix)
+                    newParticle.rlnAngleRot = degrees(rot)
+                    newParticle.rlnAngleTilt = degrees(tilt)
+                    newParticle.rlnAnglePsi = degrees(psi)
+                    
             # only change the coordinates in the star if the difference is more than a pixel (avoid change by rounding errors)
             if abs(newParticle.rlnCoordinateX - point[2] * binning) > 1:
                 newParticle.rlnCoordinateX = point[2] * binning
@@ -191,6 +210,10 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
 
         viewer.text_overlay.text = "%s points copied from layer %s to layer %s." % (len(pointLayers[copyFromLayerID].selected_data),pointLayers[copyFromLayerID].name,pointLayers[copyToLayerID].name)
         viewer.text_overlay.visible = True
+
+        # unselect copied points on both layers
+        pointLayers[copyToLayerID].selected_data = []
+        pointLayers[copyFromLayerID].selected_data = []
 
     @magicgui( call_button='Color IMOD style')
     def imodStylePoints():
@@ -279,9 +302,11 @@ if __name__ == "__main__":
     add('--color_lb', type=str, default="",
         help="Label from the star file that will be used for rainbow coloring of the markers.")
     add('--bin', type=float, default="0.0",
-        help="User provided binnig of the --itomo. If not set the apix of the first MRC file in --itomo is taken to calcualte the binning.")
+        help="User provided binnig of the --itomo. If not set the apix of the first MRC file in --itomo is taken to calculate the binning.")
     add('--point_size', type=int, default="7",
         help="Size of the points in pixels.")
+    add('--angles_mrc', type=str, default="",
+        help="emClarity *_angles.mrc from template matching, to be used for newly added particles orientations. Same named *_angles.list must be present in the directory.")
 
     args = parser.parse_args()
 
@@ -289,4 +314,8 @@ if __name__ == "__main__":
         parser.print_help()
         exit()
 
-    main(args.i, args.itomo, args.o, args.tomo_name, args.color_lb, args.bin, args.point_size)
+    if args.angles_mrc != "":
+        # check if angles list exists
+        pass
+
+    main(args.i, args.itomo, args.o, args.tomo_name, args.color_lb, args.bin, args.point_size, args.angles_mrc)
