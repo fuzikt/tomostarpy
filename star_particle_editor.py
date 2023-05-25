@@ -175,9 +175,9 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         mdOut.removeDataTable(dataTableName)
         mdOut.addDataTable(dataTableName, metaDatas[metadataID].isLoop(dataTableName))
         mdOut.addLabels(dataTableName, metaDatas[metadataID].getLabels(dataTableName))
-        # add the records of non-selected tomoName
+        # add the records of non-selected tomoName if a tomoName is defined
         for particle in metaDatas[metadataID].data_particles:
-            if particle.rlnTomoName != tomoName:
+            if particle.rlnTomoName != tomoName and tomoName != "":
                 nonEditedParticles.append(particle)
         mdOut.addData(dataTableName, nonEditedParticles)
         mdOut.addData(dataTableName, newParticles)
@@ -268,7 +268,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
                     if not pointAddingSettings.refreshRecursionBreak:
                         pointAddingSettings.refreshRecursionBreak = True
                         layer.refresh()
-                    #layer.refresh_colors()
+                        layer.refresh_colors()
+                        layer.selected_data = []
 
     for pointLayer in pointLayers:
         pointLayer.mouse_drag_callbacks.append(next_on_click)
