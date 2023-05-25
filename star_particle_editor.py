@@ -146,7 +146,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
 
             newParticle = metaDatas[metadataID].data_particles[particleID]
             if pointLayers[pointLayerID].features['particleID'][pointCounter] == "NaN":
-                if angles_mrc != "":
+                if angles_mrc == "":
                     newParticle.rlnAngleRot = 0.0
                     newParticle.rlnAngleTilt = 0.0
                     newParticle.rlnAnglePsi = 0.0
