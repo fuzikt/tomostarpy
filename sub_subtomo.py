@@ -15,8 +15,8 @@ class subSubvolume:
             description="Creates a star file with sub-subtomo coordinates similar to sub-particle approach in SPA.",
             formatter_class=RawTextHelpFormatter)
         add = self.parser.add_argument
-        add('--i', help="Input star file file.")
-        add('--o', help="Output prefix")
+        add('--i', help="Input star file.")
+        add('--o', help="Output star file.")
         add('--cmm',
               help="A CMM file defining the location(s) of the subparticle(s) "
                    "(use instead of --vector). Coordinates should be in Angstrom.")
