@@ -10,7 +10,7 @@ import lib.matrix2 as matrix2
 class rotXFfile:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Set the Euler angles (tilt, psi) of the particles along a filament according to the angles of the between the neighboring particle centers.")
+            description="Rotate the values in IMOD xf file to change the rotation of the finally aligned stack.")
         add = self.parser.add_argument
         add('--i', help="Input IMOD xf file.")
         add('--o', help="Output IMOD xf file.")
