@@ -166,7 +166,7 @@ class MergeTiltsFlow:
         lookForNewStartTilt = True
 
         for fileName in tilt_files:
-            if float(fileName.split("_")[2][:-4]) == self.startTilt:
+            if float(fileName.split("_")[2].replace(".tif", "")) == self.startTilt:
                 if lookForNewStartTilt:
                     if len(perPointTiltSeries) > 0:
                         if self.writePerPointTitlSeriesListFile(perPointTiltSeries):
