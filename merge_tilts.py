@@ -10,7 +10,7 @@ from shutil import which
 
 class MergeTiltsFlow:
 
-    def __init__(self, tilts_dir, out_dir, startTilt=0, startTiltSeriesNr=1, tomo_prefix='tomo', mdoc_dir="", mdoc_suffix=".tif.mdoc", pre_dose=0.0, dose=0.0, newstackcmd = 'newstack', path='', watch_interval=1, verbosity = 1):
+    def __init__(self, tilts_dir, out_dir, startTilt=0, startTiltSeriesNr=1, tomo_prefix='tomo', mdoc_dir="", mdoc_suffix=".tif.mdoc", pre_dose=0.0, dose=0.0, apix=1.0, newstackcmd = 'newstack', alterheadercmd = 'alterheader', path='', watch_interval=1, verbosity = 1):
         self.tilts_dir = tilts_dir
         self.out_dir = out_dir
         self.startTilt = startTilt
@@ -20,7 +20,9 @@ class MergeTiltsFlow:
         self.mdoc_suffix = mdoc_suffix
         self.pre_dose = pre_dose
         self.dose = dose
+        self.apix = apix
         self.newstackcmd = newstackcmd
+        self.alterheadercmd = alterheadercmd
         self.watch_interval = watch_interval
         self.versbosity = verbosity
         self.my_env = os.environ.copy()
@@ -137,6 +139,16 @@ class MergeTiltsFlow:
                 print("Something bad happened during running the newstack command.")
                 print(newstackProcess.stderr)
                 return False
+
+            alterHeaderCommand =[self.alterheadercmd, "-d", "%0.3f,%0.3f,%0.3f" % (self.apix, self.apix, self.apix), "%s/%s%s/%s%s.mrc" % (self.out_dir, self.tomo_prefix, self.lastTiltSeriesNr + i, self.tomo_prefix, self.lastTiltSeriesNr + i)  ]
+            if self.versbosity > 1 : print("Running: %s" % " ".join(alterHeaderCommand))
+            alterHeaderProcess = subprocess.run(alterHeaderCommand, env=self.my_env, stdout=subprocess.DEVNULL)
+            if alterHeaderProcess.returncode != 0:
+                print("Something bad happened during running the alterheader command.")
+                print(alterHeaderProcess.stderr)
+                return False
+
+
             if self.versbosity > 0 : print(" -> %s/%s%s/%s%s.mrc created." % (self.out_dir, self.tomo_prefix, self.lastTiltSeriesNr + i, self.tomo_prefix, self.lastTiltSeriesNr + i))
 
             # remove original tilts and the text file
@@ -265,8 +277,12 @@ if __name__ == "__main__":
         help="Dose applied before acquiring the first tilt. [e-/A^2]. (Default: 0.0)")
     add('--dose', type=float, default=0.0,
         help="Dose applied per tilt. [e-/A^2]. (Default: 0.0)")
+    add('--apix', type=float, default=1.0,
+        help="Pixel size of the merged tilt-series. [A/px]. (Default: 1.0)")
     add('--newstack_cmd', type=str, default="newstack",
         help="Name of the IMOD newstack command. (Default newstack)")
+    add('--newstack_cmd', type=str, default="alterheader",
+        help="Name of the IMOD alterheader command. (Default alterheader)")
     add('--path', type=str, default="",
         help="Path to be included in env PATH for IMOD! (Default: empty)")
     add('--watch_int', type=int, default="1",
@@ -280,6 +296,6 @@ if __name__ == "__main__":
         parser.print_help()
         exit()
 
-    mergeTiltsWatchdog = MergeTiltsFlow(args.i, args.o, args.start_tilt, args.start_series_nr, args.prefix, args.mdoc_dir, args.mdoc_suffix, args.pre_dose, args.dose, args.newstack_cmd, args.path, args.watch_int, args.verb)
+    mergeTiltsWatchdog = MergeTiltsFlow(args.i, args.o, args.start_tilt, args.start_series_nr, args.prefix, args.mdoc_dir, args.mdoc_suffix, args.pre_dose, args.dose, args.apix, args.newstack_cmd, args.alterheader_cmd, args.path, args.watch_int, args.verb)
 
     mergeTiltsWatchdog.main()
