@@ -100,8 +100,9 @@ class rotBiomtMat:
         biomtSymMatrices, biomtSymTrans = self.readBIOMTmatrices(args.i)
 
         if args.i_mat == "":
-            rotMatrix = matrix3.matrix_from_euler(args.rot, args.tilt, args.psi)
-            rotTrans = [args.x, args.y, args.z]
+            rotMatrix = []
+            rotMatrix.append(matrix3.matrix_from_euler(args.rot, args.tilt, args.psi))
+            rotTrans = [[args.x, args.y, args.z]]
         else:
             rotMatrix, rotTrans = self.readBIOMTmatrices(args.i_mat)
 
