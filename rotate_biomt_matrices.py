@@ -13,7 +13,7 @@ class rotBiomtMat:
         add = self.parser.add_argument
         add('--i', help="Input PDB file.")
         add('--o', help="Output file.")
-        add('--i_mat', help="Input file with rotation and translation matrix in BIOMT format used for the rotation. If defined --rot, --tilt and --psi are ignored.")
+        add('--i_mat', type=str, default="", help="Input file with rotation and translation matrix in BIOMT format used for the rotation. If defined --rot, --tilt and --psi are ignored.")
         add('--rot', type=float, default="0.00",
             help="Euler angle ROT in degrees.  (Default 0.0)")
         add('--tilt', type=float, default="0.00",
@@ -51,6 +51,8 @@ class rotBiomtMat:
             for pdbLine in pdbFile.readlines():
                 if "REMARK 350" in pdbLine:
                     remarkLine = pdbLine.split()
+                    if len(remarkLine) < 2:
+                        continue
                     if remarkLine[2] == "BIOMT1":
                         m00,m01,m02 = (float(remarkLine[4]),float(remarkLine[5]),float(remarkLine[6]))
                         x = float(remarkLine[7])
