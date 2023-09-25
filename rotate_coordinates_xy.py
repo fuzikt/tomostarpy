@@ -15,11 +15,11 @@ class rotateCoordinates:
         add = self.parser.add_argument
         add('--i', help="Input star file.")
         add('--o', help="Output star file.")
-        add('--ang', type=str, default="0.00",
+        add('--ang', type=float, default=0.00,
             help="Rotation angle in degrees. (Default 0.0)")
-        add('--xmax', type=float, default="4092",
+        add('--xmax', type=float, default=4092,
             help="X-size of the unbinned tomogram. (Default 4092)")
-        add('--ymax', type=float, default="5760",
+        add('--ymax', type=float, default=5760,
             help="X-size of the unbinned tomogram. (Default  5760)")
 
     def usage(self):
