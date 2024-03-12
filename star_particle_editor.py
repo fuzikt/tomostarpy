@@ -297,7 +297,7 @@ if __name__ == "__main__":
     add = parser.add_argument
     add('--i', help="Input star file. Possible to open multiple star files delimited by comma.")
     add('--itomo', help="Input mrc file. Possible to open multiple mrc files delimited by comma.")
-    add('--o', help="Output star file name. Possible to change later in the gui.")
+    add('--o', default="output.star", help="Output star file name. Possible to change later in the gui.")
     add('--tomo_name', type=str, default="",
         help="Use only particles from tomogram equal in rlnTomoName. OPTIONAL: If not set all particles will be visualized.")
     add('--color_lb', type=str, default="",
