@@ -12,6 +12,7 @@ import argparse
 from lib.matrix3 import *
 from lib.euler import *
 
+
 def readMrcSizeApix(mrcFileName):
     with open(mrcFileName, "rb") as mrcFile:
         imageSizeX = int(struct.unpack('i', mrcFile.read(4))[0])
@@ -28,6 +29,7 @@ def readMrcSizeApix(mrcFileName):
         originZ = float(struct.unpack('f', mrcFile.read(4))[0])
     return imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ
 
+
 def readMrcData(mrcFileName):
     with open(mrcFileName, "rb") as mrcFile:
         imageSizeX = int(struct.unpack('i', mrcFile.read(4))[0])
@@ -37,10 +39,19 @@ def readMrcData(mrcFileName):
                               offset=1024 - 12)
     return mrcData
 
-def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, pointSize, angles_mrc):
 
+def readAngleListFile(self, angleListFile):
+    anglesList = []
+    with open(angleListFile) as file:
+        for line in file:
+            anglesList.append([float(line.split()[0]), float(line.split()[1]),
+                               float(line.split()[2])])
+    return anglesList
+
+
+def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, pointSize, angles_mrc):
     if "," in inputMrcs:
-        inputMrcs = inputMrcs.replace(","," ")
+        inputMrcs = inputMrcs.replace(",", " ")
 
     inputMrcFiles = inputMrcs.split(" ")
 
@@ -89,10 +100,10 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         for particle in md:
             particles.append(particle)
 
-        #get unbinned apix from star file
+        # get unbinned apix from star file
         starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
 
-        if binning == 0: #binnig not set by user
+        if binning == 0:  # binnig not set by user
             binning = apix / starApix
 
         print("For %s binning is: %0.2f" % (inputStarFile, binning))
@@ -103,7 +114,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         particleCounter = 0
         for particle in particles:
             if tomoName == "" or tomoName == particle.rlnTomoName:
-                pointCoordinates.append([particle.rlnCoordinateZ/binning, particle.rlnCoordinateY/binning, particle.rlnCoordinateX/binning])
+                pointCoordinates.append([particle.rlnCoordinateZ / binning, particle.rlnCoordinateY / binning,
+                                         particle.rlnCoordinateX / binning])
                 if coloringLb != "":
                     coloringValues.append(particle.rlnCtfFigureOfMerit)
                 else:
@@ -121,14 +133,17 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         particleIDs = np.array(particleIDs)
         metadataID = metaDataCounter
 
-        point_features = {'particleID': particleIDs, 'metadataID': metadataID, 'coloringValue': coloringValues }
-        pointLayers.append(viewer.add_points(pointCoordinates, features=point_features, size=pointSize, name=inputStarFile, face_color='coloringValue', face_colormap=gredYellowGreen, edge_colormap=gredYellowGreen, edge_color='coloringValue', out_of_slice_display=True))
+        point_features = {'particleID': particleIDs, 'metadataID': metadataID, 'coloringValue': coloringValues}
+        pointLayers.append(
+            viewer.add_points(pointCoordinates, features=point_features, size=pointSize, name=inputStarFile,
+                              face_color='coloringValue', face_colormap=gredYellowGreen, edge_colormap=gredYellowGreen,
+                              edge_color='coloringValue', out_of_slice_display=True))
         pointLayers[metadataID].feature_defaults['particleID'] = "NaN"
         pointLayers[metadataID].feature_defaults['metadataID'] = metadataID
 
         metaDataCounter += 1
 
-    @magicgui(pointsToSave = {'label': 'Save:'}, outputFile = {'label': 'Star file name:'}, call_button='Save')
+    @magicgui(pointsToSave={'label': 'Save:'}, outputFile={'label': 'Star file name:'}, call_button='Save')
     def saveStarFile(pointsToSave: Points, outputFile=outputStarFile):
         pointLayerID = pointLayers.index(pointsToSave)
 
@@ -151,14 +166,15 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
                     newParticle.rlnAngleTilt = 0.0
                     newParticle.rlnAnglePsi = 0.0
                 else:
-                    angleListIndex = int(anglesMrcData[int(point[2]),int(point[1]),int(point[0])])-1
+                    angleListIndex = int(anglesMrcData[int(point[2]), int(point[1]), int(point[0])]) - 1
                     eulersZXZ = anglesList[angleListIndex]
-                    rotMatrix = matrix_from_euler_zxz(radians(eulersZXZ[0]), radians(eulersZXZ[1]), radians(eulersZXZ[2]))
+                    rotMatrix = matrix_from_euler_zxz(radians(eulersZXZ[0]), radians(eulersZXZ[1]),
+                                                      radians(eulersZXZ[2]))
                     rot, tilt, psi = euler_from_matrix(rotMatrix)
                     newParticle.rlnAngleRot = degrees(rot)
                     newParticle.rlnAngleTilt = degrees(tilt)
                     newParticle.rlnAnglePsi = degrees(psi)
-                    
+
             # only change the coordinates in the star if the difference is more than a pixel (avoid change by rounding errors)
             if abs(newParticle.rlnCoordinateX - point[2] * binning) > 1:
                 newParticle.rlnCoordinateX = point[2] * binning
@@ -198,9 +214,12 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         copyToLayerID = pointLayers.index(copyTo)
 
         for point in pointLayers[copyFromLayerID].selected_data:
-            pointLayers[copyToLayerID].feature_defaults['particleID'] =  pointLayers[copyFromLayerID].features['particleID'][point]
-            pointLayers[copyToLayerID].feature_defaults['metadataID'] =  pointLayers[copyFromLayerID].features['metadataID'][point]
-            pointLayers[copyToLayerID].feature_defaults['coloringValue'] =  pointLayers[copyFromLayerID].features['coloringValue'][point]
+            pointLayers[copyToLayerID].feature_defaults['particleID'] = \
+            pointLayers[copyFromLayerID].features['particleID'][point]
+            pointLayers[copyToLayerID].feature_defaults['metadataID'] = \
+            pointLayers[copyFromLayerID].features['metadataID'][point]
+            pointLayers[copyToLayerID].feature_defaults['coloringValue'] = \
+            pointLayers[copyFromLayerID].features['coloringValue'][point]
             pointLayers[copyToLayerID].add(pointLayers[copyFromLayerID].data[point])
             pointLayers[copyToLayerID].refresh_colors()
 
@@ -208,17 +227,19 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
         pointLayers[copyToLayerID].feature_defaults['particleID'] = 'NaN'
         pointLayers[copyToLayerID].feature_defaults['metadataID'] = copyToLayerID
 
-        viewer.text_overlay.text = "%s points copied from layer %s to layer %s." % (len(pointLayers[copyFromLayerID].selected_data),pointLayers[copyFromLayerID].name,pointLayers[copyToLayerID].name)
+        viewer.text_overlay.text = "%s points copied from layer %s to layer %s." % (
+        len(pointLayers[copyFromLayerID].selected_data), pointLayers[copyFromLayerID].name,
+        pointLayers[copyToLayerID].name)
         viewer.text_overlay.visible = True
 
         # unselect copied points on both layers
         pointLayers[copyToLayerID].selected_data = []
         pointLayers[copyFromLayerID].selected_data = []
 
-    @magicgui( call_button='Color IMOD style')
+    @magicgui(call_button='Color IMOD style')
     def imodStylePoints():
         for pointLayer in pointLayers:
-            pointLayer.face_color = [0,0,0,0]
+            pointLayer.face_color = [0, 0, 0, 0]
             pointLayer.edge_width = 0.05
             pointLayer.edge_width_is_relative = True
             pointLayer.edge_colormap = None
@@ -234,7 +255,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
 
     pointAddingSettings = PointAddingSettingsClass()
 
-    @magicgui(snapEnabled = {'label': 'Enable new point snaping:'}, imageForSnapping = {'label': 'Image for peak search:'}, snapRadius = {'label': 'Radius for peak search [px]:'}, call_button=False)
+    @magicgui(snapEnabled={'label': 'Enable new point snaping:'}, imageForSnapping={'label': 'Image for peak search:'},
+              snapRadius={'label': 'Radius for peak search [px]:'}, call_button=False)
     def snapToMax(snapEnabled: bool, imageForSnapping: Image, snapRadius=1):
         print(snapEnabled)
         pointAddingSettings.snapEnabled = snapEnabled
@@ -256,7 +278,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
                     y = int(layer.data[-1][1])
                     z = int(layer.data[-1][0])
                     maxValue = 0.0
-                    for xi in range(x-pointAddingSettings.snapRadius, x+pointAddingSettings.snapRadius):
+                    for xi in range(x - pointAddingSettings.snapRadius, x + pointAddingSettings.snapRadius):
                         for yi in range(y - pointAddingSettings.snapRadius, y + pointAddingSettings.snapRadius):
                             for zi in range(z - pointAddingSettings.snapRadius, z + pointAddingSettings.snapRadius):
                                 if pointAddingSettings.imageForSnapping.data[zi, yi, xi] > maxValue:
@@ -284,11 +306,13 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, coloringLb, binning, p
     @viewer.bind_key('PageUp')
     def hello_world(viewer):
         viewer.dims.set_point(axis=0, value=viewer.dims.point[0] + 1)
+
     @viewer.bind_key('PageDown')
     def hello_world(viewer):
         viewer.dims.set_point(axis=0, value=viewer.dims.point[0] - 1)
 
     napari.run()
+
 
 if __name__ == "__main__":
     # if called directly from command line
