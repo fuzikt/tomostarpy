@@ -40,7 +40,7 @@ def readMrcData(mrcFileName):
     return mrcData
 
 
-def readAngleListFile(self, angleListFile):
+def readAngleListFile(angleListFile):
     anglesList = []
     with open(angleListFile) as file:
         for line in file:
