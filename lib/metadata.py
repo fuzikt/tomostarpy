@@ -747,7 +747,10 @@ class MetaData:
         delattr(self, dataTableName)
 
     def _setItemValue(self, item, label, value):
-        setattr(item, label.name, label.type(value))
+        if label.type == int:
+            setattr(item, label.name, label.type(float(value)))
+        else:
+            setattr(item, label.name, label.type(value))
 
     def _addLabel(self, dataTableName, labelName):
         getattr(self, dataTableName + "_labels")[labelName] = Label(labelName)
