@@ -281,7 +281,7 @@ if __name__ == "__main__":
         help="Pixel size of the merged tilt-series. [A/px]. (Default: 1.0)")
     add('--newstack_cmd', type=str, default="newstack",
         help="Name of the IMOD newstack command. (Default newstack)")
-    add('--newstack_cmd', type=str, default="alterheader",
+    add('--alterheader_cmd', type=str, default="alterheader",
         help="Name of the IMOD alterheader command. (Default alterheader)")
     add('--path', type=str, default="",
         help="Path to be included in env PATH for IMOD! (Default: empty)")
