@@ -114,7 +114,7 @@ class MergeTiltsFlow:
         for i in range(len(perPointTiltSeries)):
             if self.versbosity > 0 : print("Processing %s%s..." % (self.tomo_prefix, self.lastTiltSeriesNr + i))
 
-            perPointTiltSeries[i].sort(key=lambda x: float(x.split("_")[2].replace(".tif", "")))
+            perPointTiltSeries[i].sort(key=lambda x: float(x.split("_")[2].replace(".mrc", "")))
             # write txt file with sorted tilt files
             with open('%s%s.txt' % (self.tomo_prefix, self.lastTiltSeriesNr + i), 'w') as f:
                 f.write("%s\n" % len(perPointTiltSeries[i]))
@@ -178,7 +178,7 @@ class MergeTiltsFlow:
         lookForNewStartTilt = True
 
         for fileName in tilt_files:
-            if float(fileName.split("_")[2].replace(".tif", "")) == self.startTilt:
+            if float(fileName.split("_")[2].replace(".mrc", "")) == self.startTilt:
                 if lookForNewStartTilt:
                     if len(perPointTiltSeries) > 0:
                         if self.writePerPointTitlSeriesListFile(perPointTiltSeries):
@@ -192,14 +192,14 @@ class MergeTiltsFlow:
                     lookForNewStartTilt = False
                 else:
                     perPointTiltSeries.append([fileName])
-                lastTilt = float(fileName.split("_")[2].replace(".tif", ""))
+                lastTilt = float(fileName.split("_")[2].replace(".mrc", ""))
             else:
                 lookForNewStartTilt = True
-                if lastTilt != float(fileName.split("_")[2].replace(".tif", "")):
+                if lastTilt != float(fileName.split("_")[2].replace(".mrc", "")):
                     perPointTiltCounter = 0
                 perPointTiltSeries[perPointTiltCounter].append(fileName)
                 perPointTiltCounter += 1
-                lastTilt = float(fileName.split("_")[2].replace(".tif", ""))
+                lastTilt = float(fileName.split("_")[2].replace(".mrc", ""))
 
         return lastAmountOfFiles, perPointTiltSeries
 
