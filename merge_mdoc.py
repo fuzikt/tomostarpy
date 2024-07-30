@@ -46,7 +46,7 @@ class MergeMdoc:
                         if "FrameSet" in mdocLine:
                             frameSetFound = True
                             firstMdoc = False
-                            tomoMdocFile.write("[ZValue = %s ]\n" % tomoCounter)
+                            tomoMdocFile.write("\n[ZValue = %s ]\n" % tomoCounter)
                             continue
                         if not frameSetFound and firstMdoc:
                             tomoMdocFile.write(mdocLine)
