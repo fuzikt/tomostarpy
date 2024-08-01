@@ -17,12 +17,11 @@ class MergeMdoc:
         self.dose = dose
         self.versbosity = verbosity
 
-    def processMdocFiles(self, mrcTiltList, tomoNr):
+    def processMdocFiles(self, mdocTiltList, tomoNr):
         #generate rawtlt file
         rawTltName = self.out_dir + "/" + self.tomo_prefix + str(tomoNr) +"/"+ self.tomo_prefix + str(tomoNr)+".rawtlt"
         with open(rawTltName, 'w') as rawTltFile:
-            for mrcTiltName in mrcTiltList:
-                mdocName = mrcTiltName
+            for mdocName in mdocTiltList:
                 if not os.path.isfile(mdocName):
                     print("ERROR: File %s does not exist. Skipping mdoc processing." % mdocName)
                     return
@@ -39,8 +38,7 @@ class MergeMdoc:
             firstMdoc = True
             frameSetFound = False
             tomoCounter = 0
-            for mrcTiltName in mrcTiltList:
-                mdocName = mrcTiltName
+            for mdocName in mdocTiltList:
                 with open(mdocName, 'r') as mdocFile:
                     for mdocLine in mdocFile.readlines():
                         if "FrameSet" in mdocLine:
@@ -58,17 +56,16 @@ class MergeMdoc:
         if self.versbosity > 0: print(" -> %s created." % tomoMdocName)
 
         #generate tiltOrderList + dosePerTiltList
-        mrcTiltList.sort(key=lambda x: x.split("_")[1])
+        mdocTiltList.sort(key=lambda x: x.split("_")[1])
         tiltCounter = 0
         tiltDose = self.pre_dose
         tiltDoseList = []
         tltOrderName = self.out_dir + "/" + self.tomo_prefix + str(tomoNr) + "/" + self.tomo_prefix + str(
             tomoNr) + ".tltorder"
         with open(tltOrderName, 'w') as tltOrderFile:
-            for mrcTiltName in mrcTiltList:
+            for mdocName in mdocTiltList:
                 tiltCounter += 1
                 tiltDose += self.dose
-                mdocName = mrcTiltName
                 with open(mdocName, 'r') as mdocFile:
                     for mdocLine in mdocFile.readlines():
                         if "TiltAngle" in mdocLine:
@@ -110,7 +107,6 @@ class MergeMdoc:
         return True
 
     def processFilesInList(self, tilt_files):
-        lastAmountOfFiles = len(tilt_files)
         perPointTiltSeries = []
         lookForNewStartTilt = True
 
@@ -154,9 +150,6 @@ class MergeMdoc:
 
     def main(self):
         self.validateInputs()
-
-        # watchdog for new files
-        if self.versbosity > 0 : print("Starting the processing watchdog processing... Stop by sending SIGTERM (Ctrl-C).")
 
         tilt_files = os.listdir(self.tilts_dir)
 
