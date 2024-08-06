@@ -131,7 +131,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                     pointCoordinates.append([particle.rlnCoordinateZ / binning, particle.rlnCoordinateY / binning,
                                              particle.rlnCoordinateX / binning])
                 if coloringLb != "":
-                    coloringValues.append(particle.rlnCtfFigureOfMerit)
+                    coloringValues.append(getattr(particle, coloringLb)
                 else:
                     coloringValues.append(0.0)
                 particleIDs.append(particleCounter)
