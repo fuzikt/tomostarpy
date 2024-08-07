@@ -130,6 +130,14 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         particleIDs = []
         particleCounter = 0
         for particle in particles:
+            if hasattr(particle, "rlnCenteredCoordinateXAngst"):
+                # convert Relion5 centered coordinates
+                setattr(particle, "rlnCoordinateX", (particle.rlnCenteredCoordinateXAngst+imageSizeX/2*apix)/starApix)
+                setattr(particle, "rlnCoordinateY",
+                        (particle.rlnCenteredCoordinateYAngst + imageSizeY / 2 * apix) / starApix)
+                setattr(particle, "rlnCoordinateZ",
+                        (particle.rlnCenteredCoordinateZAngst + imageSizeZ / 2 * apix) / starApix)
+
             if tomoName == "" or tomoName == particle.rlnTomoName:
                 if asVectors:
                     if hasattr(particle, "rlnAnglePsi"):
