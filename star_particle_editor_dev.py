@@ -50,7 +50,7 @@ def readAngleListFile(angleListFile):
     return anglesList
 
 
-def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, vectorSize, coloringLb, binning, pointSize, angles_mrc):
+def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, vectorSize, coloringLb, binning, pointSize, starApix, angles_mrc):
 
     if "," in inputMrcs:
         inputMrcs = inputMrcs.replace(",", " ")
@@ -105,7 +105,20 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
             particles.append(particle)
 
         # get unbinned apix from star file
-        starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+        if starApix == 0:
+            if hasattr(md, "data_optics"):
+                starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+                print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
+            elif hasattr(md, "data_"):
+                starApix = float(md.data_[0].rlnDetectorPixelSize)
+                print("No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %f0.2" % starApix)
+            elif hasattr(md, "data_particles"):
+                starApix = float(md.data_[0].rlnDetectorPixelSize)
+                print(
+                    "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %f0.2" % starApix)
+            else:
+                print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
+                exit()
 
         if binning == 0:  # binnig not set by user
             binning = apix / starApix
@@ -379,6 +392,8 @@ if __name__ == "__main__":
         help="User provided binnig of the --itomo. If not set the apix of the first MRC file in --itomo is taken to calculate the binning.")
     add('--point_size', type=int, default="7",
         help="Size of the points in pixels.")
+    add('--star_apix', type=int, default="0",
+        help="Apix of the coordinates in the star file. Autodetected form star file if set to 0. (Default: 0 - autodetect)")
     add('--angles_mrc', type=str, default="",
         help="emClarity *_angles.mrc from template matching, to be used for newly added particles orientations. Same named *_angles.list must be present in the directory.")
 
@@ -393,4 +408,4 @@ if __name__ == "__main__":
         # check if angles list exists
         pass
 
-    main(args.i, args.itomo, args.o, args.tomo_name, args.vector, args.vec_len, args.vec_size, args.color_lb, args.bin, args.point_size, args.angles_mrc)
+    main(args.i, args.itomo, args.o, args.tomo_name, args.vector, args.vec_len, args.vec_size, args.color_lb, args.bin, args.point_size, args.star_apix, args.angles_mrc)
