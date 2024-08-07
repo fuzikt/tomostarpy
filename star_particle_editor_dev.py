@@ -316,8 +316,14 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         auto_call=True,
         threshold={'widget_type': 'FloatSlider', 'min': 0, 'max': 0.5}
     )
-    def confidence_slider(layer: napari.layers.Points, threshold=0.5):
-        layer.shown = layer.features['coloringValue'] > threshold
+    def thresholdSlider(layer: napari.layers.Points, threshold=0.5):
+        layer.shown = layer.features['coloringValue'] >= threshold
+
+    @thresholdSlider.layer.changed.connect
+    def update_threshold(layer: napari.layers.Points, event=None):
+        thresholdSlider.threshold.max = max(layer.features['coloringValue'])
+        thresholdSlider.threshold.value = min(layer.features['coloringValue'])
+
 
     @magicgui(call_button='Color IMOD style')
     def imodStylePoints():
@@ -382,9 +388,11 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
 
     viewer.window.add_dock_widget(copyPointsBetweenLayers, name="Copy Points Between Layers")
     viewer.window.add_dock_widget(saveStarFile, name="Save Star File")
-    viewer.window.add_dock_widget(confidence_slider, name="threshold")
+    viewer.window.add_dock_widget(thresholdSlider, name="Thresholding")
     viewer.window.add_dock_widget(imodStylePoints, name="Color IMOD style")
     viewer.window.add_dock_widget(snapToMax, name="New point snapping")
+    # set the threshold slider range
+    update_threshold(pointLayer)
 
     # IMOD style PageUP/PageDown slice change
     @viewer.bind_key('PageUp')
