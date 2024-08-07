@@ -207,7 +207,12 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
 
             metadataID = int(saveLayer.features['metadataID'][pointCounter])
 
-            newParticle = metaDatas[metadataID].data_particles[particleID]
+            if hasattr(metaDatas[metadataID], "data_particles"):
+                particleDataFrameName = "data_particles"
+            else:
+                particleDataFrameName = "data_"
+
+            newParticle = getattr(metaDatas[metadataID], particleDataFrameName)[particleID]
             if saveLayer.features['particleID'][pointCounter] == "NaN":
                 if angles_mrc == "":
                     newParticle.rlnAngleRot = 0.0
@@ -241,17 +246,26 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                 newParticle.rlnCoordinateY = pointY * binning
             if abs(newParticle.rlnCoordinateZ - pointZ * binning) > 1:
                 newParticle.rlnCoordinateZ = pointZ * binning
+
+            #convert coordinates to relion5 format if the original file was in that
+            if hasattr(newParticle, "rlnCenteredCoordinateXAngst"):
+                newParticle.rlnCenteredCoordinateXAngst = (newParticle.rlnCoordinateX-imageSizeX/2) * starApix
+            if hasattr(newParticle, "rlnCenteredCoordinateYAngst"):
+                newParticle.rlnCenteredCoordinateYAngst = (newParticle.rlnCoordinateY-imageSizeY/2) * starApix
+            if hasattr(newParticle, "rlnCenteredCoordinateZAngst"):
+                newParticle.rlnCenteredCoordinateZAngst = (newParticle.rlnCoordinateZ-imageSizeZ/2) * starApix
+
             newParticles.append(deepcopy(newParticle))
             pointCounter += 1
 
         mdOut = metaDatas[metadataID].clone()
-        dataTableName = "data_particles"
+        dataTableName = particleDataFrameName
 
         mdOut.removeDataTable(dataTableName)
         mdOut.addDataTable(dataTableName, metaDatas[metadataID].isLoop(dataTableName))
         mdOut.addLabels(dataTableName, metaDatas[metadataID].getLabels(dataTableName))
         # add the records of non-selected tomoName if a tomoName is defined
-        for particle in metaDatas[metadataID].data_particles:
+        for particle in getattr(metaDatas[metadataID],particleDataFrameName):
             if particle.rlnTomoName != tomoName and tomoName != "":
                 nonEditedParticles.append(particle)
         mdOut.addData(dataTableName, nonEditedParticles)
