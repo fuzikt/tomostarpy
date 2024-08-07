@@ -3,7 +3,7 @@ import numpy as np
 import struct
 import sys
 import napari
-from napari.layers import Points, Shapes, Image
+from napari.layers import Points, Shapes, Image, Layer
 from magicgui import magicgui
 import vispy.color
 from lib.metadata import MetaData
@@ -131,7 +131,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                     pointCoordinates.append([particle.rlnCoordinateZ / binning, particle.rlnCoordinateY / binning,
                                              particle.rlnCoordinateX / binning])
                 if coloringLb != "":
-                    coloringValues.append(getattr(particle, coloringLb)
+                    coloringValues.append(float(getattr(particle, coloringLb)))
                 else:
                     coloringValues.append(0.0)
                 particleIDs.append(particleCounter)
@@ -274,6 +274,13 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         pointLayers[copyToLayerID].selected_data = []
         pointLayers[copyFromLayerID].selected_data = []
 
+    @magicgui(
+        auto_call=True,
+        threshold={'widget_type': 'FloatSlider', 'min': 0, 'max': 0.5}
+    )
+    def confidence_slider(layer: napari.layers.Points, threshold=0.5):
+        layer.shown = layer.features['coloringValue'] > threshold
+
     @magicgui(call_button='Color IMOD style')
     def imodStylePoints():
         for pointLayer in pointLayers:
@@ -337,6 +344,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
 
     viewer.window.add_dock_widget(copyPointsBetweenLayers, name="Copy Points Between Layers")
     viewer.window.add_dock_widget(saveStarFile, name="Save Star File")
+    viewer.window.add_dock_widget(confidence_slider, name="threshold")
     viewer.window.add_dock_widget(imodStylePoints, name="Color IMOD style")
     viewer.window.add_dock_widget(snapToMax, name="New point snapping")
 
