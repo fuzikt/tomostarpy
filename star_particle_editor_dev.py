@@ -198,7 +198,10 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         nonEditedParticles = []
         pointCounter = 0
 
-        for point in saveLayer.data:
+        for point_index, point in enumerate(saveLayer.data):
+            if saveLayer.shown[point_index] == False:
+                continue
+
             if saveLayer.features['particleID'][pointCounter] != "NaN":
                 particleID = int(saveLayer.features['particleID'][pointCounter])
             else:
