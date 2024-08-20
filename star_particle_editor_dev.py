@@ -111,14 +111,19 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                 print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
             elif hasattr(md, "data_"):
                 starApix = float(md.data_[0].rlnDetectorPixelSize)
-                print("No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %f0.2" % starApix)
+                print("No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
             elif hasattr(md, "data_particles"):
                 starApix = float(md.data_[0].rlnDetectorPixelSize)
                 print(
-                    "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %f0.2" % starApix)
+                    "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
             else:
                 print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
                 exit()
+
+        if hasattr(md.data_[0], "rlnTomoName"):
+            tomoNameLabel = "rlnTomoName"
+        elif hasattr(md.data_[0], "rlnMicrographName"):
+            tomoNameLabel = "rlnMicrographName"
 
         if binning == 0:  # binnig not set by user
             binning = apix / starApix
@@ -138,7 +143,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                 setattr(particle, "rlnCoordinateZ",
                         (particle.rlnCenteredCoordinateZAngst + imageSizeZ / 2 * apix) / starApix)
 
-            if tomoName == "" or tomoName == particle.rlnTomoName:
+            if tomoName == "" or tomoName == getattr(particle, tomoNameLabel):
                 if asVectors:
                     if hasattr(particle, "rlnAnglePsi"):
                         anglePsi = particle.rlnAnglePsi
@@ -269,7 +274,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         mdOut.addLabels(dataTableName, metaDatas[metadataID].getLabels(dataTableName))
         # add the records of non-selected tomoName if a tomoName is defined
         for particle in getattr(metaDatas[metadataID],particleDataFrameName):
-            if particle.rlnTomoName != tomoName and tomoName != "":
+            if getattr(particle, tomoNameLabel) != tomoName and tomoName != "":
                 nonEditedParticles.append(particle)
         mdOut.addData(dataTableName, nonEditedParticles)
         mdOut.addData(dataTableName, newParticles)
