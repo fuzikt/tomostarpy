@@ -36,8 +36,13 @@ def readMrcData(mrcFileName):
         imageSizeX = int(struct.unpack('i', mrcFile.read(4))[0])
         imageSizeY = int(struct.unpack('i', mrcFile.read(4))[0])
         imageSizeZ = int(struct.unpack('i', mrcFile.read(4))[0])
-        mrcData = np.fromfile(mrcFile, dtype=np.dtype(np.float32), count=(imageSizeX * imageSizeY * imageSizeZ),
-                              offset=1024 - 12)
+        mrcMode = int(struct.unpack('i', mrcFile.read(4))[0])
+        if mrcMode == 2:
+            mrcType = np.float32
+        elif mrcMode == 12:
+            mrcType = np.float16
+        mrcData = np.fromfile(mrcFile, dtype=np.dtype(mrcType), count=(imageSizeX * imageSizeY * imageSizeZ),
+                              offset=1024 - 16)
     return mrcData
 
 
