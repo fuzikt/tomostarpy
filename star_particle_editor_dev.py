@@ -55,7 +55,7 @@ def readAngleListFile(angleListFile):
     return anglesList
 
 
-def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, vectorSize, coloringLb, binning, pointSize, starApix, angles_mrc):
+def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, vectorSize, coloringLb, binning, pointSize, starApix, invertMrc, angles_mrc):
 
     if "," in inputMrcs:
         inputMrcs = inputMrcs.replace(",", " ")
@@ -79,6 +79,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
 
     for inputMrcFile in inputMrcFiles:
         mrcData = readMrcData(inputMrcFile)
+        if invertMrc:
+            mrcData *= -1
         imageSizeX, imageSizeY, imageSizeZ, apix, originX, originY, originZ = readMrcSizeApix(inputMrcFile)
         mrcData = mrcData.reshape((-1, imageSizeY, imageSizeX))
         viewer.add_image(mrcData, name=inputMrcFile)
@@ -437,6 +439,8 @@ if __name__ == "__main__":
         help="Size of the points in pixels.")
     add('--star_apix', type=int, default="0",
         help="Apix of the coordinates in the star file. Autodetected form star file if set to 0. (Default: 0 - autodetect)")
+    add('--invert_mrc', dest='invert_mrc', action='store_true', default=False,
+        help="Invert the contrast of the tomograms.")
     add('--angles_mrc', type=str, default="",
         help="emClarity *_angles.mrc from template matching, to be used for newly added particles orientations. Same named *_angles.list must be present in the directory.")
 
@@ -451,4 +455,4 @@ if __name__ == "__main__":
         # check if angles list exists
         pass
 
-    main(args.i, args.itomo, args.o, args.tomo_name, args.vector, args.vec_len, args.vec_size, args.color_lb, args.bin, args.point_size, args.star_apix, args.angles_mrc)
+    main(args.i, args.itomo, args.o, args.tomo_name, args.vector, args.vec_len, args.vec_size, args.color_lb, args.bin, args.point_size, args.star_apix, args.invert_mrc, args.angles_mrc)
