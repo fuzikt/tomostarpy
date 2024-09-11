@@ -170,7 +170,7 @@ def rotateVolume(np.ndarray[DTYPE_t, ndim=1] mrcData, int sizeX, int sizeY, int 
 @cython.nonecheck(False)
 @cython.cdivision(True)
 def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, bint outputCmm, tomoName,
-                    binning,
+                    starApix, binning,
                     bint placePartialVolumes, recenter, coloringLabel, bint outputColorMap, float colorMapTreshold,
                     int colorMapExtend, bint radial_color, Xtilt, Ytilt):
     #read in star file
@@ -186,6 +186,24 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     #get unbinned apix from star file
     cdef float apix
     apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
+    # get unbinned apix from star file (support for pytom_template_match generated stars)
+    if starApix == 0:
+        if hasattr(md, "data_optics"):
+            apix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+            print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
+        elif hasattr(md, "data_"):
+            apix = float(md.data_[0].rlnDetectorPixelSize)
+            print(
+                        "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+        elif hasattr(md, "data_particles"):
+            apix = float(md.data_[0].rlnDetectorPixelSize)
+            print(
+                    "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+        else:
+            print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
+            exit()
+    else:
+        apix = starApix
 
     if tomoName != "":
         filteredParticles = []

@@ -22,8 +22,10 @@ class placebackSubvolume:
             help="Create Chimera cmm file with the coordinates of the placed sub-volumes.")
         add('--tomo_name', type=str, default="",
             help="Use only particles from tomogram equal in rlnTomoName. OPTIONAL: If not set all particles used in place-back")
+        add('--star_apix', type=float, default="0.0",
+            help="Apix of the coordinates in the star file. Autodetected form star file if set to 0. (Default: 0 - autodetect)")
         add('--bin', type=str, default="0",
-            help="Binning factor of the stencil tomogram. If not provided calculated from MRC header and star file")
+            help="Binning factor of the stencil tomogram. If not provided calculated from MRC header and star file apix")
         add('--no_partial', dest='no_partial', action='store_true', default=False,
             help="Do not place partial volumes. If the subvolume is partially out of the output volume, it is not placed at all. This avoids \"half-cut\" sub-volumes in the output.")
         add('--recenter', dest='recenter', action='store_true', default=False,
@@ -85,6 +87,7 @@ class placebackSubvolume:
         outputPrefix = args.o
         outputCmm = args.cmm
         tomoName = args.tomo_name
+        starApix = float(args.star_apix)
         binning = float(args.bin)
         if args.no_partial == False:
             placePartialVolumes = True
@@ -112,9 +115,9 @@ class placebackSubvolume:
                             placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
                             radial_color, Xtilt, Ytilt)
         else:
-            placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, binning,
-                            placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
-                            radial_color, Xtilt, Ytilt)
+            placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, starApix,
+                            binning, placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold,
+                            colorMapExtend, radial_color, Xtilt, Ytilt)
 
 
 if __name__ == "__main__":
