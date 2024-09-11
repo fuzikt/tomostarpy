@@ -179,13 +179,8 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
     for particle in md:
         particles.append(particle)
 
-    optic_groups = []
-    for optic_group in md.data_optics:
-        optic_groups.append(optic_group)
-
     #get unbinned apix from star file
     cdef float apix
-    apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
     # get unbinned apix from star file (support for pytom_template_match generated stars)
     if starApix == 0:
         if hasattr(md, "data_optics"):
