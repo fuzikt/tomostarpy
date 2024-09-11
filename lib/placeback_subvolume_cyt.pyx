@@ -296,6 +296,16 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
 
     print("Placing %i subvolumes:" % nrOfParticles)
     for particle in particles:
+
+        # convert Relion5 centered coordinates
+        if hasattr(particle, "rlnCenteredCoordinateXAngst"):
+            setattr(particle, "rlnCoordinateX",
+                    (particle.rlnCenteredCoordinateXAngst + mapMaxX / 2 * mapApix) / apix)
+            setattr(particle, "rlnCoordinateY",
+                    (particle.rlnCenteredCoordinateYAngst + mapMaxY / 2 * mapApix) / apix)
+            setattr(particle, "rlnCoordinateZ",
+                    (particle.rlnCenteredCoordinateZAngst + mapMaxZ / 2 * mapApix) / apix)
+
         if recenter:
             xpos = (particle.rlnCoordinateX - particle.rlnOriginXAngst / apix) / coordinateBinningFactor
             ypos = (particle.rlnCoordinateY - particle.rlnOriginYAngst / apix) / coordinateBinningFactor
