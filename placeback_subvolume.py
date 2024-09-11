@@ -111,9 +111,8 @@ class placebackSubvolume:
 
         if args.gpu:
             placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName,
-                            binning,
-                            placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold, colorMapExtend,
-                            radial_color, Xtilt, Ytilt)
+                            starApix, binning, placePartialVolumes, recenter, coloringLabel, outputColorMap,
+                            colorMapTreshold, colorMapExtend, radial_color, Xtilt, Ytilt)
         else:
             placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, starApix,
                             binning, placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold,

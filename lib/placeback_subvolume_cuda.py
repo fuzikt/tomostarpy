@@ -196,7 +196,7 @@ def matrix_from_euler(rot, tilt, psi):
     m[2, 2] = cos(tilt)
     return m
 
-def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName,
+def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, outputPrefix, outputCmm, tomoName, starApix,
                     binning, placePartialVolumes, recenter, coloringLabel, outputColorMap, colorMapTreshold,
                     colorMapExtend, radial_color, Xtilt, Ytilt):
 
@@ -209,12 +209,24 @@ def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, out
     for particle in md:
         particles.append(particle)
 
-    optic_groups = []
-    for optic_group in md.data_optics:
-        optic_groups.append(optic_group)
-
     #get unbinned apix from star file
-    apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
+    if starApix == 0:
+        if hasattr(md, "data_optics"):
+            apix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+            print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
+        elif hasattr(md, "data_"):
+            apix = float(md.data_[0].rlnDetectorPixelSize)
+            print(
+                "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+        elif hasattr(md, "data_particles"):
+            apix = float(md.data_[0].rlnDetectorPixelSize)
+            print(
+                "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+        else:
+            print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
+            exit()
+    else:
+        apix = starApix
 
     if tomoName != "":
         filteredParticles = []
@@ -308,6 +320,15 @@ def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, out
         progress = int(currentParticleNr / nrOfParticles * 20)
         sys.stdout.write("[%-20s] %d%%" % ('=' * progress, 5 * progress))
         sys.stdout.flush()
+
+        # convert Relion5 centered coordinates
+        if hasattr(particle, "rlnCenteredCoordinateXAngst"):
+            setattr(particle, "rlnCoordinateX",
+                    (particle.rlnCenteredCoordinateXAngst + mapMaxX / 2 * mapApix) / apix)
+            setattr(particle, "rlnCoordinateY",
+                    (particle.rlnCenteredCoordinateYAngst + mapMaxY / 2 * mapApix) / apix)
+            setattr(particle, "rlnCoordinateZ",
+                    (particle.rlnCenteredCoordinateZAngst + mapMaxZ / 2 * mapApix) / apix)
 
         if recenter:
             xpos = (particle.rlnCoordinateX - particle.rlnOriginXAngst / apix) / coordinateBinningFactor
