@@ -404,7 +404,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
     viewer.window.add_dock_widget(imodStylePoints, name="Color IMOD style")
     viewer.window.add_dock_widget(snapToMax, name="New point snapping")
     # set the threshold slider range
-    update_threshold(pointLayer)
+    if not asVectors:
+        update_threshold(pointLayer)
 
     # IMOD style PageUP/PageDown slice change
     @viewer.bind_key('PageUp')
@@ -437,7 +438,7 @@ if __name__ == "__main__":
         help="User provided binnig of the --itomo. If not set the apix of the first MRC file in --itomo is taken to calculate the binning.")
     add('--point_size', type=int, default="7",
         help="Size of the points in pixels.")
-    add('--star_apix', type=int, default="0",
+    add('--star_apix', type=float, default="0.0",
         help="Apix of the coordinates in the star file. Autodetected form star file if set to 0. (Default: 0 - autodetect)")
     add('--invert_mrc', dest='invert_mrc', action='store_true', default=False,
         help="Invert the contrast of the tomograms.")
