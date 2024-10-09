@@ -62,7 +62,7 @@ def excludeTiltsFromTomoStar(inputFile, outputFile, indicesToRemove):
         for line in filteredTomoStarLines:
             outTiltListFile.write("%s" % line)
 
-def main(inputFile, outputPrefix, tomostarDir, excludeFile):
+def main(inputFile, outputPrefix, tomostarFile, excludeFile):
     with open(excludeFile, 'r') as tiltListFile:
         rangeList = tiltListFile.read()
 
@@ -115,9 +115,8 @@ def main(inputFile, outputPrefix, tomostarDir, excludeFile):
 
     print("XML has been modified and saved to %s" % outputPrefix)
 
-    tomoStarFileName=tomostarDir+"/"+args.i.replace("xml", "tomostar")
-    outTomoStarFileName=tomostarDir+"/"+args.o+".tomostar"
-    excludeTiltsFromTomoStar(tomoStarFileName, outTomoStarFileName, indicesToRemove)
+    outTomoStarFileName=outputPrefix+".tomostar"
+    excludeTiltsFromTomoStar(tomostarFile, outTomoStarFileName, indicesToRemove)
 
     print("Tomostar has been modified and saved to %s" % outTomoStarFileName)
 
@@ -129,17 +128,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Removes tilts defined in --exclude_file from Warp2 tilt-series XML file and tomostar file.")
     add = parser.add_argument
-    add('--i', help="Input Warp2 tilt-series XML file.")
+    add('--i_xml', help="Input Warp2 tilt-series XML file.")
+    add('--i_tomostar', type=str, default="",
+        help="Input tomostar file.")
     add('--o', help="Output prefix for XML and tomostar file.")
-    add('--tomostar_dir', type=str, default="./",
-        help="Directory where tomostar files are located. (Default ./)")
+
     add('--exclude_file', type=str, default="",
         help="Textfile with comma separated list of excluded views (or range of views as in newstack).")
 
     args = parser.parse_args()
 
-    if args.i == "" or args.o == "" or len(sys.argv) == 1:
+    if args.i_xml == "" or args.i_tomostar == "" or args.o == "" or len(sys.argv) == 1:
         parser.print_help()
         exit()
 
-    main(args.i, args.o, args.tomostar_dir, args.exclude_file)
+    main(args.i_xml, args.o, args.i_tomostar, args.exclude_file)
