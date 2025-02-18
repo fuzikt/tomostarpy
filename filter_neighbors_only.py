@@ -5,13 +5,15 @@ import sys
 import math
 from copy import deepcopy
 from lib.metadata import MetaData
+from lib.vector3 import vector_from_two_eulers, dot_product, Vector3
+from lib.matrix3 import matrix_from_euler
 import argparse
 
 
 class sortByParticleDistance:
     def define_parser(self):
         self.parser = argparse.ArgumentParser(
-            description="Select only particles that have certain amount of neighbors in a particular distance. Useful for filtering out surface features.")
+            description="Select only particles that have certain amount of neighbors in a particular distance. Useful for filtering out template matched particles.")
         add = self.parser.add_argument
         add('--i', help="Input STAR file name with particles.")
         add('--o', help="Output STAR file name.")
@@ -21,8 +23,10 @@ class sortByParticleDistance:
             help="Minimum number of neighbors at --dist particle has to be kept in selection! (Default 1)")
         add('--min_corr', type=str, default="0",
             help="Minimum cross-correlation value of the neighbour to be considered as a true neighbour! (Default 0)")
-        add('--max_tilt_diff', type=float, default="360",
-            help="Maximum amount of tilt angle difference in degrees between neighbors to be considered as a true neighbour! (Default 360)")
+        add('--lb_corr', type=str, default="rlnLCCmax",
+            help="Label of the cross-correlation value in the star file! (Default rlnLCCmax)")
+        add('--max_ang_dist', type=float, default="360",
+            help="Maximum angular distance in degrees between neighbors to be considered as a true neighbour! (Default 360)")
 
     def usage(self):
         self.parser.print_help()
@@ -47,21 +51,48 @@ class sortByParticleDistance:
             particles.append(particle)
         return particles
 
-    def sortParticleByDistance(self, particles, apix, minNeighNr, maxDist, minXcorr, max_tilt_diff):
+    def rotateVector(self, X, Y, Z, rot, tilt, psi):
+        rotation_matrix = matrix_from_euler(rot, tilt, psi)
+        Xrot = (rotation_matrix.m[0][0] * X + rotation_matrix.m[0][1] * Y + rotation_matrix.m[0][2] * Z)
+        Yrot = (rotation_matrix.m[1][0] * X + rotation_matrix.m[1][1] * Y + rotation_matrix.m[1][2] * Z)
+        Zrot = (rotation_matrix.m[2][0] * X + rotation_matrix.m[2][1] * Y + rotation_matrix.m[2][2] * Z)
+
+        return Xrot, Yrot, Zrot
+
+    def ang_distance(self,p1, p2):
+        v1 = Vector3(self.rotateVector(0, 0, 1, math.radians(p1.rlnAngleRot), math.radians(p1.rlnAngleTilt), math.radians(p1.rlnAnglePsi)))
+        v2 = Vector3(self.rotateVector(0, 0, 1, math.radians(p2.rlnAngleRot), math.radians(p2.rlnAngleTilt), math.radians(p2.rlnAnglePsi)))
+        dp = dot_product(v1, v2) / (v1.length() * v2.length())
+        dp = max(min(dp, 1.0), -1.0)
+        angle = math.acos(dp)
+        return math.degrees(angle)
+
+    def sortParticleByDistance(self, particles, apix, minNeighNr, maxDist, minXcorr, lbCorr, maxAngDist):
         newParticles = []
         counter = 0
         repeat = True
-
         while repeat:
             for particle in particles:
                 for compParticle in particles:
                     if compParticle != particle:
-                        if (math.sqrt((particle.rlnCoordinateX * apix - particle.rlnOriginXAngst - compParticle.rlnCoordinateX * apix + compParticle.rlnOriginXAngst) ** 2 + (
-                                particle.rlnCoordinateY * apix - particle.rlnOriginYAngst - compParticle.rlnCoordinateY * apix + compParticle.rlnOriginYAngst) ** 2 + (
-                                particle.rlnCoordinateZ * apix - particle.rlnOriginZAngst - compParticle.rlnCoordinateZ * apix + compParticle.rlnOriginZAngst) ** 2) <= maxDist)\
-                                and compParticle.rlnCtfFigureOfMerit >= minXcorr and (abs(particle.rlnAngleTilt-compParticle.rlnAngleTilt)<=max_tilt_diff):
+                        if hasattr(particle, 'rlnCenteredCoordinateXAngst'):
+                            partX = particle.rlnCenteredCoordinateXAngst
+                            partY = particle.rlnCenteredCoordinateYAngst
+                            partZ = particle.rlnCenteredCoordinateZAngst
+                            compPartX = compParticle.rlnCenteredCoordinateXAngst
+                            compPartY = compParticle.rlnCenteredCoordinateYAngst
+                            compPartZ = compParticle.rlnCenteredCoordinateZAngst
+                        else:
+                            partX = particle.rlnCoordinateX * apix - particle.rlnOriginXAngst
+                            partY = particle.rlnCoordinateY * apix - particle.rlnOriginYAngst
+                            partZ = particle.rlnCoordinateZ * apix - particle.rlnOriginZAngst
+                            compPartX = compParticle.rlnCoordinateX * apix - compParticle.rlnOriginXAngst
+                            compPartY = compParticle.rlnCoordinateY * apix - compParticle.rlnOriginYAngst
+                            compPartZ = compParticle.rlnCoordinateZ * apix - compParticle.rlnOriginZAngst
+                        if (math.sqrt((partX-compPartX) ** 2 + (partY-compPartY) ** 2 + (partZ-compPartZ) ** 2) <= maxDist)\
+                            and float(getattr(compParticle, lbCorr)) >= minXcorr and (abs(self.ang_distance(particle,compParticle)) <= maxAngDist):
                             counter += 1
-                            if counter == minNeighNr:
+                            if counter >= minNeighNr:
                                 counter = 0
                                 newParticles.append(particle)
                                 break
@@ -73,7 +104,6 @@ class sortByParticleDistance:
                 repeat = False
 
         print("Total %s particles were selected." % str(len(newParticles)))
-
         return newParticles
 
     def main(self):
@@ -90,14 +120,24 @@ class sortByParticleDistance:
 
         particles = self.get_particles(md)
 
-        optic_groups = []
-        for optic_group in md.data_optics:
-            optic_groups.append(optic_group)
-
         # get unbinned apix from star file
-        apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
+        if hasattr(md, "data_optics"):
+            apix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+            print("Apix of star got form the first optic group. Apix = %f0.2" % apix)
+        elif hasattr(md, "data_"):
+            apix = float(md.data_[0].rlnDetectorPixelSize)
+            print(
+                "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % apix)
+        elif hasattr(md, "data_particles"):
+            apix = float(md.data_[0].rlnDetectorPixelSize)
+            print(
+                "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % apix)
+        else:
+            print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
+            exit()
 
-        new_particles.extend(self.sortParticleByDistance(particles, apix, int(args.min_neigh), float(args.dist), float(args.min_corr), args.max_tilt_diff))
+        print(f"Sorting {len(particles)} particles by distance.....")
+        new_particles.extend(self.sortParticleByDistance(particles, apix, int(args.min_neigh), float(args.dist), float(args.min_corr), args.lb_corr, args.max_ang_dist))
 
         if md.version == "3.1":
             mdOut = md.clone()
