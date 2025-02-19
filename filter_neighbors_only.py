@@ -5,7 +5,7 @@ import sys
 import math
 from copy import deepcopy
 from lib.metadata import MetaData
-from lib.vector3 import vector_from_two_eulers, dot_product, Vector3
+from lib.vector3 import dot_product, Vector3
 from lib.matrix3 import matrix_from_euler
 import argparse
 
@@ -59,7 +59,7 @@ class sortByParticleDistance:
 
         return Xrot, Yrot, Zrot
 
-    def ang_distance(self,p1, p2):
+    def angDistance(self,p1, p2):
         v1 = Vector3(self.rotateVector(0, 0, 1, math.radians(p1.rlnAngleRot), math.radians(p1.rlnAngleTilt), math.radians(p1.rlnAnglePsi)))
         v2 = Vector3(self.rotateVector(0, 0, 1, math.radians(p2.rlnAngleRot), math.radians(p2.rlnAngleTilt), math.radians(p2.rlnAnglePsi)))
         dp = dot_product(v1, v2) / (v1.length() * v2.length())
