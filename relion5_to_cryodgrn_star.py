@@ -84,6 +84,7 @@ class Relion5ToCryodrgnStar:
                     newParticle.rlnDefocusU = tilt.rlnDefocusU
                     newParticle.rlnDefocusV = tilt.rlnDefocusV
                     newParticle.rlnDefocusAngle = tilt.rlnDefocusAngle
+                    newParticle.rlnCtfScalefactor = tilt.rlnCtfScalefactor
                     newParticle.rlnMicrographName = particle.rlnTomoName
                     newParticle.rlnGroupName = particle.rlnTomoName
                     newParticle.rlnVoltage = voltage
@@ -109,7 +110,7 @@ class Relion5ToCryodrgnStar:
         mdOut.addDataTable(dataTableName, True)
         mdOut.addLabels(dataTableName,
                         ["rlnMagnification", "rlnDetectorPixelSize", "rlnVoltage", "rlnSphericalAberration",
-                         "rlnAmplitudeContrast", "rlnPhaseShift", "rlnDefocusU", "rlnDefocusV", "rlnDefocusAngle",
+                         "rlnAmplitudeContrast", "rlnPhaseShift", "rlnDefocusU", "rlnDefocusV", "rlnDefocusAngle","rlnCtfScalefactor",
                          "rlnImageName", "rlnMicrographName", "rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi", "rlnGroupName"])
         mdOut.addData(dataTableName, new_particles)
         mdOut.write(args.o)
