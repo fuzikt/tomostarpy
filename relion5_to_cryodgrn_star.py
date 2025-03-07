@@ -84,7 +84,10 @@ class Relion5ToCryodrgnStar:
                     newParticle.rlnDefocusU = tilt.rlnDefocusU
                     newParticle.rlnDefocusV = tilt.rlnDefocusV
                     newParticle.rlnDefocusAngle = tilt.rlnDefocusAngle
-                    newParticle.rlnCtfScalefactor = tilt.rlnCtfScalefactor
+                    if hasattr(tilt, "rlnCtfScalefactor"):
+                        newParticle.rlnCtfScalefactor = tilt.rlnCtfScalefactor
+                    else:
+                        newParticle.rlnCtfScalefactor = 1.0
                     newParticle.rlnMicrographName = particle.rlnTomoName
                     newParticle.rlnGroupName = particle.rlnTomoName
                     newParticle.rlnVoltage = voltage
