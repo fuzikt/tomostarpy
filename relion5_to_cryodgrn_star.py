@@ -89,7 +89,7 @@ class Relion5ToCryodrgnStar:
                     else:
                         newParticle.rlnCtfScalefactor = 1.0
                     newParticle.rlnMicrographName = particle.rlnTomoName
-                    newParticle.rlnGroupName = particle.rlnTomoName
+                    newParticle.rlnGroupName = particle.rlnTomoParticleName
                     newParticle.rlnVoltage = voltage
                     newParticle.rlnSphericalAberration = cs
                     newParticle.rlnAmplitudeContrast = ac
