@@ -90,7 +90,7 @@ class sortByParticleDistance:
                             compPartY = compParticle.rlnCoordinateY * apix - compParticle.rlnOriginYAngst
                             compPartZ = compParticle.rlnCoordinateZ * apix - compParticle.rlnOriginZAngst
                         if (math.sqrt((partX-compPartX) ** 2 + (partY-compPartY) ** 2 + (partZ-compPartZ) ** 2) <= maxDist)\
-                            and float(getattr(compParticle, lbCorr)) >= minXcorr and (abs(self.ang_distance(particle,compParticle)) <= maxAngDist):
+                            and float(getattr(compParticle, lbCorr)) >= minXcorr and (abs(self.angDistance(particle,compParticle)) <= maxAngDist):
                             counter += 1
                             if counter >= minNeighNr:
                                 counter = 0
