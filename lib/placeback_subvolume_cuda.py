@@ -219,10 +219,10 @@ def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, out
     if starApix == 0:
         try:
             if hasattr(md, "data_optics"):
-                starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+                apix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
                 print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
             else:
-                starApix = float(getattr(md, particleDataFrameName)[0].rlnDetectorPixelSize)
+                apix = float(getattr(md, particleDataFrameName)[0].rlnDetectorPixelSize)
                 print(
                     "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
         except:
