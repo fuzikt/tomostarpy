@@ -191,7 +191,7 @@ def placeSubvolumes(inputStarFile, inputVolumeToPlace, outputMapStencil, outputP
             print(
                         "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
         elif hasattr(md, "data_particles"):
-            apix = float(md.data_[0].rlnDetectorPixelSize)
+            apix = float(md.data_particles[0].rlnDetectorPixelSize)
             print(
                     "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
         else:
