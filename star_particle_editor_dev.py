@@ -111,7 +111,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         for particle in md:
             particles.append(particle)
 
-        if hasattr(md[metadataID], "data_particles"):
+        if hasattr(md, "data_particles"):
             particleDataFrameName = "data_particles"
         else:
             particleDataFrameName = "data_"
