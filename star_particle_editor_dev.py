@@ -120,7 +120,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                 starApix = float(md.data_[0].rlnDetectorPixelSize)
                 print("No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
             elif hasattr(md, "data_particles"):
-                starApix = float(md.data_[0].rlnDetectorPixelSize)
+                starApix = float(md.data_particles[0].rlnDetectorPixelSize)
                 print(
                     "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
             else:
