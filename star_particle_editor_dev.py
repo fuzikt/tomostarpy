@@ -111,25 +111,28 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         for particle in md:
             particles.append(particle)
 
+        if hasattr(md[metadataID], "data_particles"):
+            particleDataFrameName = "data_particles"
+        else:
+            particleDataFrameName = "data_"
+
         # get unbinned apix from star file
         if starApix == 0:
-            if hasattr(md, "data_optics"):
-                starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
-                print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
-            elif hasattr(md, "data_"):
-                starApix = float(md.data_[0].rlnDetectorPixelSize)
-                print("No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
-            elif hasattr(md, "data_particles"):
-                starApix = float(md.data_particles[0].rlnDetectorPixelSize)
-                print(
-                    "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
-            else:
+            try:
+                if hasattr(md, "data_optics"):
+                    starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+                    print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
+                else:
+                    starApix = float(getattr(md,particleDataFrameName)[0].rlnDetectorPixelSize)
+                    print(
+                        "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+            except:
                 print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
                 exit()
 
-        if hasattr(md.data_[0], "rlnTomoName"):
+        if hasattr(getattr(md, particleDataFrameName)[0], "rlnTomoName"):
             tomoNameLabel = "rlnTomoName"
-        elif hasattr(md.data_[0], "rlnMicrographName"):
+        elif hasattr(getattr(md, particleDataFrameName)[0], "rlnMicrographName"):
             tomoNameLabel = "rlnMicrographName"
 
         if binning == 0:  # binnig not set by user
