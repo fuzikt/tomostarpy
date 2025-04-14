@@ -210,19 +210,22 @@ def placeSubvolumes_gpu(inputStarFile, inputVolumeToPlace, outputMapStencil, out
         particles.append(particle)
 
     #get unbinned apix from star file
+    if hasattr(md, "data_particles"):
+        particleDataFrameName = "data_particles"
+    else:
+        particleDataFrameName = "data_"
+
+    # get unbinned apix from star file
     if starApix == 0:
-        if hasattr(md, "data_optics"):
-            apix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
-            print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
-        elif hasattr(md, "data_"):
-            apix = float(md.data_[0].rlnDetectorPixelSize)
-            print(
-                "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
-        elif hasattr(md, "data_particles"):
-            apix = float(md.data_particles[0].rlnDetectorPixelSize)
-            print(
-                "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
-        else:
+        try:
+            if hasattr(md, "data_optics"):
+                starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+                print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
+            else:
+                starApix = float(getattr(md, particleDataFrameName)[0].rlnDetectorPixelSize)
+                print(
+                    "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+        except:
             print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
             exit()
     else:
