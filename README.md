@@ -3,6 +3,40 @@
 Some useful Python scripts to manipulate Relion tomo STAR files and much more.....
 
 
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [convmap_mod_get_particles.py](#convmap_mod_get_particlespy)
+- [create_order_list.py](#create_order_listpy)
+- [ctffind_tilts.py](#ctffind_tiltspy)
+- [dose_correct_tomostar.py](#dose_correct_tomostarpy)
+- [emc_csv_to_star.py](#emc_csv_to_starpy)
+- [emc_ctf_tlt_to_xf.py](#emc_ctf_tlt_to_xfpy)
+- [eulers_zyz_from_matrix.py](#eulers_zyz_from_matrixpy)
+- [exclude_lines_by_range_file.py](#exclude_lines_by_range_filepy)
+- [exclude_tilts.py](#exclude_tiltspy)
+- [exclude_tilts_from_warp2_ts_xml.py](#exclude_tilts_from_warp2_ts_xmlpy)
+- [filter_neighbors_only.py](#filter_neighbors_onlypy)
+- [find_bad_ctf_fit_tilts.py](#find_bad_ctf_fit_tiltspy)
+- [find_dark_tilts.py](#find_dark_tiltspy)
+- [merge_tilts.py](#merge_tiltspy)
+- [placeback_arrows.py](#placeback_arrowspy)
+- [placeback_pdb.py](#placeback_pdbpy)
+- [placeback_polygons.py](#placeback_polygonspy)
+- [placeback_subvolume.py](#placeback_subvolumepy)
+- [remove_duplicates_2_star.py](#remove_duplicates_2_starpy)
+- [rotate_biomt_matrices.py](#rotate_biomt_matricespy)
+- [rotate_coordinates_xy.py](#rotate_coordinates_xypy)
+- [rotate_subtomo_along_filament.py](#rotate_subtomo_along_filamentpy)
+- [rotate_xf.py](#rotate_xfpy)
+- [select_cmm_mod_from_star.py](#select_cmm_mod_from_starpy)
+- [shift_coordinates_by_tiltcom.py](#shift_coordinates_by_tiltcompy)
+- [sort_by_distance.py](#sort_by_distancepy)
+- [split_particles_star_to_single_tomos_star.py](#split_particles_star_to_single_tomos_starpy)
+- [star_particle_editor.py](#star_particle_editorpy)
+- [star_to_emc.py](#star_to_emcpy)
+- [sub_subtomo.py](#sub_subtomopy)
+
 ## Installation
 
 ``` 
@@ -128,16 +162,45 @@ Removes tilts defined in --exclude_file from tilt series mrc-stack and correspon
 --exclude_file  Textfile with comma separated list of excluded views (or range of views as in newstack).
 ```
 
+## exclude_tilts_from_warp2_ts_xml.py
+Removes tilts defined in --exclude_file from Warp2 tilt-series XML file and tomostar file.
+```
+    --i_xml         Input Warp2 tilt-series XML file.
+    --i_tomostar    Input tomostar file.
+    --o             Output prefix for XML and tomostar file.
+    --exclude_file  Textfile with comma separated list of excluded views (or range of views as used in imod newstack).
+```
+
+Example 1: Exclude tilts from tomo1.xml and tomo1.tomostar files, the tilts to be excluded are defined in tomo1_excluded.txt.
+```
+mkdir excluded_tilts
+
+exclude_tilts_from_warp2_ts_xml.py --i_xml warp_tiltseries/tomo1.xml --i_tomostar tomostar/tomo1.tomostar --o excluded_tilts/tomo1 --exclude_file tomo1_excluded.txt
+
+# This will create excluded_tilts/tomo1.xml and excluded_tilts/tomo1.tomostar with the tilts defined in tomo1_excluded.txt removed.
+
+Example of the content of tomo1_excluded.txt:
+1,2,12-16,20,22-24
+```
+
+Example 2: A simple bash loop to exclude tilts from multiple tomograms (can be written as a script or "one-liner" in the terminal):
+```
+for i in `seq 1 10`; do
+    exclude_tilts_from_warp2_ts_xml.py --i_xml warp_tiltseries/tomo${i}.xml --i_tomostar tomostar/tomo${i}.tomostar --o excluded_tilts/tomo${i} --exclude_file tomo${i}_excluded.txt
+done
+```
+
 ## filter_neighbors_only.py
 
-Select only particles that have a certain amount of neighbors in a particular distance. Useful for filtering out surface features.
+Select only particles that have a certain amount of neighbors in a particular distance. Useful for filtering out template matched particles.
 ```
 --i               Input STAR file name with particles.
 --o               Output STAR file name.
 --dist            Distance in Angstroms that consider particles as neighbors. (Default 1.0)
 --min_neigh       Minimum number of neighbors at --dist particle has to be kept in selection! (Default 1)
 --min_corr        Minimum cross-correlation value of the neighbour to be considered as a true neighbour! (Default 0)
---max_tilt_diff   Maximum amount of tilt angle difference in degrees between neighbors to be considered as a true neighbour! (Default 360)
+--lb_corr'        Label of the cross-correlation value in the star file! (Default rlnLCCmax)
+--max_ang_dist    Maximum angular distance in degrees between neighbors to be considered as a true neighbour! (Default 360)
 ```
 
 ## find_bad_ctf_fit_tilts.py
