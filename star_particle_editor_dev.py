@@ -55,8 +55,8 @@ def readAngleListFile(angleListFile):
     return anglesList
 
 
-def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, vectorSize, coloringLb, binning, pointSize, starApix, invertMrc, angles_mrc):
-
+def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, vectorSize, coloringLb, binning,
+         pointSize, starApix, invertMrc, angles_mrc):
     if "," in inputMrcs:
         inputMrcs = inputMrcs.replace(",", " ")
 
@@ -64,7 +64,6 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
 
     if "," in inputStars:
         inputStars = inputStars.replace(",", " ")
-
 
     inputStarFiles = inputStars.split(" ")
 
@@ -121,13 +120,14 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
             try:
                 if hasattr(md, "data_optics"):
                     starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
-                    print("Apix of star got form the first optic group. Apix = %f0.2" % starApix)
+                    print("Apix of star got form the first optic group. Apix = %0.2f" % starApix)
                 else:
-                    starApix = float(getattr(md,particleDataFrameName)[0].rlnDetectorPixelSize)
+                    starApix = float(getattr(md, particleDataFrameName)[0].rlnDetectorPixelSize)
                     print(
                         "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
             except:
-                print("Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
+                print(
+                    "Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
                 exit()
 
         if hasattr(getattr(md, particleDataFrameName)[0], "rlnTomoName"):
@@ -147,7 +147,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         for particle in particles:
             if hasattr(particle, "rlnCenteredCoordinateXAngst"):
                 # convert Relion5 centered coordinates
-                setattr(particle, "rlnCoordinateX", (particle.rlnCenteredCoordinateXAngst+imageSizeX/2*apix)/starApix)
+                setattr(particle, "rlnCoordinateX",
+                        (particle.rlnCenteredCoordinateXAngst + imageSizeX / 2 * apix) / starApix)
                 setattr(particle, "rlnCoordinateY",
                         (particle.rlnCenteredCoordinateYAngst + imageSizeY / 2 * apix) / starApix)
                 setattr(particle, "rlnCoordinateZ",
@@ -161,8 +162,11 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                         anglePsi = 0.0
 
                     pointCoordinates.append([[particle.rlnCoordinateZ / binning, particle.rlnCoordinateY / binning,
-                                             particle.rlnCoordinateX / binning],[particle.rlnCoordinateZ / binning,
-                                             particle.rlnCoordinateY / binning  + vectorLen*sin(radians(anglePsi)), particle.rlnCoordinateX/binning + vectorLen*cos(radians(anglePsi))]])
+                                              particle.rlnCoordinateX / binning], [particle.rlnCoordinateZ / binning,
+                                                                                   particle.rlnCoordinateY / binning + vectorLen * sin(
+                                                                                       radians(anglePsi)),
+                                                                                   particle.rlnCoordinateX / binning + vectorLen * cos(
+                                                                                       radians(anglePsi))]])
                 else:
                     pointCoordinates.append([particle.rlnCoordinateZ / binning, particle.rlnCoordinateY / binning,
                                              particle.rlnCoordinateX / binning])
@@ -186,13 +190,15 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         point_features = {'particleID': particleIDs, 'metadataID': metadataID, 'coloringValue': coloringValues}
         if asVectors:
             vectorLayers.append(
-                viewer.add_shapes(pointCoordinates, shape_type='line', features=point_features, edge_width=vectorSize, edge_color='coral',
+                viewer.add_shapes(pointCoordinates, shape_type='line', features=point_features, edge_width=vectorSize,
+                                  edge_color='coral',
                                   name=inputStarFile)
             )
         else:
             pointLayers.append(
                 viewer.add_points(pointCoordinates, features=point_features, size=pointSize, name=inputStarFile,
-                                  face_color='coloringValue', face_colormap=gredYellowGreen, edge_colormap=gredYellowGreen,
+                                  face_color='coloringValue', face_colormap=gredYellowGreen,
+                                  edge_colormap=gredYellowGreen,
                                   edge_color='coloringValue', out_of_slice_display=True))
             pointLayers[metadataID].feature_defaults['particleID'] = "NaN"
             pointLayers[metadataID].feature_defaults['metadataID'] = metadataID
@@ -207,7 +213,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
             saveLayer = vectorLayers[layerID]
         else:
             layerID = pointLayers.index(pointsToSave)
-            saveLayer =  pointLayers[layerID]
+            saveLayer = pointLayers[layerID]
 
         newParticles = []
         nonEditedParticles = []
@@ -247,7 +253,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                     newParticle.rlnAnglePsi = degrees(psi)
 
             if asVectors:
-                newParticle.rlnAnglePsi = degrees(atan2(point[1][1]-point[0][1],point[1][2]-point[0][2]))
+                newParticle.rlnAnglePsi = degrees(atan2(point[1][1] - point[0][1], point[1][2] - point[0][2]))
                 pointX = point[0][2]
                 pointY = point[0][1]
                 pointZ = point[0][0]
@@ -257,7 +263,6 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
                 pointZ = point[0]
             # only change the coordinates in the star if the difference is more than a pixel (avoid change by rounding errors)
 
-
             if abs(newParticle.rlnCoordinateX - pointX * binning) > 1:
                 newParticle.rlnCoordinateX = pointX * binning
             if abs(newParticle.rlnCoordinateY - pointY * binning) > 1:
@@ -265,13 +270,16 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
             if abs(newParticle.rlnCoordinateZ - pointZ * binning) > 1:
                 newParticle.rlnCoordinateZ = pointZ * binning
 
-            #convert coordinates to relion5 format if the original file was in that
+            # convert coordinates to relion5 format if the original file was in that
             if hasattr(newParticle, "rlnCenteredCoordinateXAngst"):
-                newParticle.rlnCenteredCoordinateXAngst = (newParticle.rlnCoordinateX-imageSizeX/2) * starApix
+                newParticle.rlnCenteredCoordinateXAngst = (
+                                                                      newParticle.rlnCoordinateX - imageSizeX * binning / 2) * starApix
             if hasattr(newParticle, "rlnCenteredCoordinateYAngst"):
-                newParticle.rlnCenteredCoordinateYAngst = (newParticle.rlnCoordinateY-imageSizeY/2) * starApix
+                newParticle.rlnCenteredCoordinateYAngst = (
+                                                                      newParticle.rlnCoordinateY - imageSizeY * binning / 2) * starApix
             if hasattr(newParticle, "rlnCenteredCoordinateZAngst"):
-                newParticle.rlnCenteredCoordinateZAngst = (newParticle.rlnCoordinateZ-imageSizeZ/2) * starApix
+                newParticle.rlnCenteredCoordinateZAngst = (
+                                                                      newParticle.rlnCoordinateZ - imageSizeZ * binning / 2) * starApix
 
             newParticles.append(deepcopy(newParticle))
             pointCounter += 1
@@ -283,7 +291,7 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         mdOut.addDataTable(dataTableName, metaDatas[metadataID].isLoop(dataTableName))
         mdOut.addLabels(dataTableName, metaDatas[metadataID].getLabels(dataTableName))
         # add the records of non-selected tomoName if a tomoName is defined
-        for particle in getattr(metaDatas[metadataID],particleDataFrameName):
+        for particle in getattr(metaDatas[metadataID], particleDataFrameName):
             if getattr(particle, tomoNameLabel) != tomoName and tomoName != "":
                 nonEditedParticles.append(particle)
         mdOut.addData(dataTableName, nonEditedParticles)
@@ -306,11 +314,11 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
 
         for point in pointLayers[copyFromLayerID].selected_data:
             pointLayers[copyToLayerID].feature_defaults['particleID'] = \
-            pointLayers[copyFromLayerID].features['particleID'][point]
+                pointLayers[copyFromLayerID].features['particleID'][point]
             pointLayers[copyToLayerID].feature_defaults['metadataID'] = \
-            pointLayers[copyFromLayerID].features['metadataID'][point]
+                pointLayers[copyFromLayerID].features['metadataID'][point]
             pointLayers[copyToLayerID].feature_defaults['coloringValue'] = \
-            pointLayers[copyFromLayerID].features['coloringValue'][point]
+                pointLayers[copyFromLayerID].features['coloringValue'][point]
             pointLayers[copyToLayerID].add(pointLayers[copyFromLayerID].data[point])
             pointLayers[copyToLayerID].refresh_colors()
 
@@ -319,8 +327,8 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
         pointLayers[copyToLayerID].feature_defaults['metadataID'] = copyToLayerID
 
         viewer.text_overlay.text = "%s points copied from layer %s to layer %s." % (
-        len(pointLayers[copyFromLayerID].selected_data), pointLayers[copyFromLayerID].name,
-        pointLayers[copyToLayerID].name)
+            len(pointLayers[copyFromLayerID].selected_data), pointLayers[copyFromLayerID].name,
+            pointLayers[copyToLayerID].name)
         viewer.text_overlay.visible = True
 
         # unselect copied points on both layers
@@ -338,7 +346,6 @@ def main(inputStars, inputMrcs, outputStarFile, tomoName, asVectors, vectorLen, 
     def update_threshold(layer: napari.layers.Points, event=None):
         thresholdSlider.threshold.max = max(layer.features['coloringValue'])
         thresholdSlider.threshold.value = min(layer.features['coloringValue'])
-
 
     @magicgui(call_button='Color IMOD style')
     def imodStylePoints():
@@ -432,7 +439,8 @@ if __name__ == "__main__":
     add('--o', default="output.star", help="Output star file name. Possible to change later in the gui.")
     add('--tomo_name', type=str, default="",
         help="Use only particles from tomogram equal in rlnTomoName. OPTIONAL: If not set all particles will be visualized.")
-    add('--vector', action='store_true', default=False, help="Draw particles as vectors using the rlnAnglePsi as orientation angle.")
+    add('--vector', action='store_true', default=False,
+        help="Draw particles as vectors using the rlnAnglePsi as orientation angle.")
     add('--vec_len', type=int, default="10", help="Length of the vector in pixels.")
     add('--vec_size', type=int, default="5", help="Thickness of the vector in pixels.")
     add('--color_lb', type=str, default="",
@@ -448,7 +456,6 @@ if __name__ == "__main__":
     add('--angles_mrc', type=str, default="",
         help="emClarity *_angles.mrc from template matching, to be used for newly added particles orientations. Same named *_angles.list must be present in the directory.")
 
-
     args = parser.parse_args()
 
     if args.i == "" or len(sys.argv) == 1:
@@ -459,4 +466,5 @@ if __name__ == "__main__":
         # check if angles list exists
         pass
 
-    main(args.i, args.itomo, args.o, args.tomo_name, args.vector, args.vec_len, args.vec_size, args.color_lb, args.bin, args.point_size, args.star_apix, args.invert_mrc, args.angles_mrc)
+    main(args.i, args.itomo, args.o, args.tomo_name, args.vector, args.vec_len, args.vec_size, args.color_lb, args.bin,
+         args.point_size, args.star_apix, args.invert_mrc, args.angles_mrc)
