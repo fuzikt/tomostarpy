@@ -75,7 +75,7 @@ def main(inputPrefix, outputPrefix, excludeFile):
         print("Excluding tilts [%s] from %s..." % (rangeList.strip(), inputPrefix+".mrc"))
         runNewstackToExclude(inputPrefix+".mrc", outputPrefix+".mrc", tiltList)
     else:
-        print("%s not found!!" % (inputPrefix+".rawtlt"))
+        print("%s not found!!" % (inputPrefix+".mrc"))
         exit()
 
     if os.path.exists(inputPrefix+".rawtlt"):
