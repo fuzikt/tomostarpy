@@ -21,6 +21,8 @@ class SelCmmModStar:
             help="IMOD mod file with desired coordinates.")
         add('--bin', type=float, default=0,
             help="Binnig factor of the IMOD mod file.")
+        add('--star_apix', type=float, default="0.0",
+            help="Apix of the coordinates in the star file. Autodetected form star file if set to 0. (Default: 0 - autodetect)")
 
     def usage(self):
         self.parser.print_help()
@@ -126,12 +128,27 @@ class SelCmmModStar:
 
         particles = self.get_particles(md)
 
-        optic_groups = []
-        for optic_group in md.data_optics:
-            optic_groups.append(optic_group)
+        starApix = args.star_apix
 
         # get unbinned apix from star file
-        apix = float(optic_groups[0].rlnTomoTiltSeriesPixelSize)
+        if hasattr(md, "data_particles"):
+            particleDataFrameName = "data_particles"
+        else:
+            particleDataFrameName = "data_"
+
+        if starApix == 0:
+            try:
+                if hasattr(md, "data_optics"):
+                    starApix = float(md.data_optics[0].rlnTomoTiltSeriesPixelSize)
+                    print("Apix of star got form the first optic group. Apix = %0.2f" % starApix)
+                else:
+                    starApix = float(getattr(md, particleDataFrameName)[0].rlnDetectorPixelSize)
+                    print(
+                        "No optic groups in star file. Apix of particles star got form the first particle rlnDetectorPixelSize. Apix = %0.2f" % starApix)
+            except:
+                print(
+                    "Could not get the apix of the particles from the star file. Define it using --star_apix parameter.")
+                exit()
 
         if args.cmm != '':
             print("Selecting particles from star file according to matching particle coordinates listed in cmm file...")
@@ -140,7 +157,7 @@ class SelCmmModStar:
             print("Selecting particles from star file according to matching particle coordinates listed in mod file...")
             selectedParticlesCoords = self.readModFile(args.mod, args.bin)
 
-        new_particles.extend(self.selParticles(particles, selectedParticlesCoords, apix))
+        new_particles.extend(self.selParticles(particles, selectedParticlesCoords, starApix))
 
         if md.version == "3.1":
             mdOut = md.clone()
