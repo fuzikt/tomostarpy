@@ -50,13 +50,6 @@ class sortByParticleDistance:
             particles.append(particle)
         return particles
 
-    def angDistance(self, p1, p2):
-        e1 = (p1.rlnAngleRot, p1.rlnAngleTilt, p1.rlnAnglePsi)
-        e2 = (p2.rlnAngleRot, p2.rlnAngleTilt, p2.rlnAnglePsi)
-
-        #        return self.angular_distance_matrix(e1, e2, degrees=True)
-        return self.angular_distance_quat(e1, e2, degrees=True)
-
     def rot_z(self, angle):
         c, s = np.cos(angle), np.sin(angle)
         return np.array([
@@ -100,10 +93,10 @@ class sortByParticleDistance:
 
     def sortParticleByDistance(self, particles, apix, minNeighNr, maxDist, minXcorr, lbCorr, maxAngDist):
         newParticles = []
-        counter = 0
         repeat = True
         while repeat:
             for particle in particles:
+                counter = 0
                 for compParticle in particles:
                     if compParticle != particle:
                         if hasattr(particle, 'rlnCenteredCoordinateXAngst'):
@@ -124,8 +117,8 @@ class sortByParticleDistance:
                             and float(getattr(compParticle, lbCorr)) >= minXcorr and (abs(self.angDistance(particle,compParticle)) <= maxAngDist):
                             counter += 1
                             if counter >= minNeighNr:
-                                counter = 0
-                                newParticles.append(particle)
+                                if particle not in newParticles:
+                                    newParticles.append(particle)
                                 break
             if len(newParticles) < len(particles):
                 repeat = True
