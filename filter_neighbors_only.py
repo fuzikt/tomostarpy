@@ -5,8 +5,7 @@ import sys
 import math
 from copy import deepcopy
 from lib.metadata import MetaData
-from lib.vector3 import dot_product, Vector3
-from lib.matrix3 import matrix_from_euler
+import numpy as np
 import argparse
 
 
@@ -51,21 +50,53 @@ class sortByParticleDistance:
             particles.append(particle)
         return particles
 
-    def rotateVector(self, X, Y, Z, rot, tilt, psi):
-        rotation_matrix = matrix_from_euler(rot, tilt, psi)
-        Xrot = (rotation_matrix.m[0][0] * X + rotation_matrix.m[0][1] * Y + rotation_matrix.m[0][2] * Z)
-        Yrot = (rotation_matrix.m[1][0] * X + rotation_matrix.m[1][1] * Y + rotation_matrix.m[1][2] * Z)
-        Zrot = (rotation_matrix.m[2][0] * X + rotation_matrix.m[2][1] * Y + rotation_matrix.m[2][2] * Z)
+    def angDistance(self, p1, p2):
+        e1 = (p1.rlnAngleRot, p1.rlnAngleTilt, p1.rlnAnglePsi)
+        e2 = (p2.rlnAngleRot, p2.rlnAngleTilt, p2.rlnAnglePsi)
 
-        return Xrot, Yrot, Zrot
+        #        return self.angular_distance_matrix(e1, e2, degrees=True)
+        return self.angular_distance_quat(e1, e2, degrees=True)
+
+    def rot_z(self, angle):
+        c, s = np.cos(angle), np.sin(angle)
+        return np.array([
+            [c, -s, 0],
+            [s, c, 0],
+            [0, 0, 1]
+        ])
+
+    def rot_y(self, angle):
+        c, s = np.cos(angle), np.sin(angle)
+        return np.array([
+            [c, 0, s],
+            [0, 1, 0],
+            [-s, 0, c]
+        ])
+
+    def euler_zyz_to_matrix(self, rot, tilt, psi, degrees=True):
+        if degrees:
+            rot, tilt, psi = np.radians([rot, tilt, psi])
+        return self.rot_z(rot) @ self.rot_y(tilt) @ self.rot_z(psi)
+
+    def angular_distance_matrix(self, e1, e2, degrees=True):
+        R1 = self.euler_zyz_to_matrix(*e1, degrees=degrees)
+        R2 = self.euler_zyz_to_matrix(*e2, degrees=degrees)
+
+        R_rel = R1.T @ R2
+        trace = np.trace(R_rel)
+
+        # Numerical safety
+        cos_theta = (trace - 1) / 2
+        cos_theta = np.clip(cos_theta, -1.0, 1.0)
+
+        theta = np.arccos(cos_theta)
+        return np.degrees(theta) if degrees else theta
 
     def angDistance(self,p1, p2):
-        v1 = Vector3(self.rotateVector(0, 0, 1, math.radians(p1.rlnAngleRot), math.radians(p1.rlnAngleTilt), math.radians(p1.rlnAnglePsi)))
-        v2 = Vector3(self.rotateVector(0, 0, 1, math.radians(p2.rlnAngleRot), math.radians(p2.rlnAngleTilt), math.radians(p2.rlnAnglePsi)))
-        dp = dot_product(v1, v2) / (v1.length() * v2.length())
-        dp = max(min(dp, 1.0), -1.0)
-        angle = math.acos(dp)
-        return math.degrees(angle)
+        p1ang = (p1.rlnAngleRot, p1.rlnAngleTilt, p1.rlnAnglePsi)
+        p2ang = (p2.rlnAngleRot, p2.rlnAngleTilt, p2.rlnAnglePsi)
+
+        return self.angular_distance_matrix(p1ang, p2ang, degrees=True)
 
     def sortParticleByDistance(self, particles, apix, minNeighNr, maxDist, minXcorr, lbCorr, maxAngDist):
         newParticles = []
